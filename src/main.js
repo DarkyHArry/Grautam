@@ -16,6 +16,15 @@ const iconPath = app.isPackaged
   : path.join(__dirname, '..', 'assets', 'grautam.ico');
 const dev = !app.isPackaged;
 
+function isValidDepartureDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
+  const today = new Date();
+  return date.getTime() >= Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+}
+
 function windows() { return BrowserWindow.getAllWindows().filter(w => !w.isDestroyed()); }
 function createWindow({ page = 'index.html', width = 1440, height = 960, minWidth = 1100, minHeight = 740, title = 'Grautam' } = {}) {
   const win = new BrowserWindow({ width, height, minWidth, minHeight, resizable: false, maximizable: false, fullscreenable: true, center: true, frame: false, show: false, title, icon: iconPath,
@@ -30,7 +39,10 @@ function createWindow({ page = 'index.html', width = 1440, height = 960, minWidt
   win.webContents.setWindowOpenHandler(({ url }) => { if (url.startsWith('mailto:')) shell.openExternal(url); return { action: 'deny' }; });
   if (dev) win.loadFile(path.join(__dirname, 'renderer', page));
   else win.loadFile(path.join(__dirname, 'renderer', page));
-  win.webContents.on('will-navigate', event => event.preventDefault());
+  win.webContents.on('will-navigate', (event, url) => {
+    event.preventDefault();
+    if (url.startsWith('mailto:')) shell.openExternal(url).catch(error => console.error('Falha ao abrir cliente de e-mail:', error));
+  });
   return win;
 }
 function showNotice(body, title = 'Grautam', force = false) {
@@ -104,7 +116,7 @@ ipcMain.handle('app:request', async (event, channel, payload) => {
         passengers: Number(rawTrip.passengers),
         createdAt: Date.now()
       };
-      if (!trip.origin || !trip.destination || trip.origin === trip.destination || !/^\d{4}-\d{2}-\d{2}$/.test(trip.date) || !Number.isInteger(trip.passengers) || trip.passengers < 1 || trip.passengers > 9) throw new Error('Revise origem, destino, data e número de passageiros.');
+      if (!trip.origin || !trip.destination || trip.origin === trip.destination || !isValidDepartureDate(trip.date) || !Number.isInteger(trip.passengers) || trip.passengers < 1 || trip.passengers > 9) throw new Error('Revise origem, destino, data futura válida e número de passageiros.');
       const payment = ['PIX', 'Cartão', 'Boleto'].includes(payload?.payment) ? payload.payment : 'PIX';
       const airlines = ['LATAM', 'Azul', 'GOL', 'Avianca', 'Copa Airlines', 'Iberia', 'Air France', 'Lufthansa'];
       const airline = airlines.includes(payload?.airline) ? payload.airline : 'LATAM';
@@ -149,10 +161,13 @@ function setupFirstRun() {
   fs.writeFileSync(complete, JSON.stringify({ version: 1, completedAt: new Date().toISOString() }), { flag: 'w' });
 }
 
-app.whenReady().then(() => {
-  try { setupFirstRun(); } catch (error) { require('electron').dialog.showErrorBox('Grautam', error.message); app.quit(); return; }
-  const lock = app.requestSingleInstanceLock();
-  if (!lock) { app.quit(); return; }
+const singleInstanceLock = app.requestSingleInstanceLock();
+if (!singleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => { mainWindow?.show(); mainWindow?.focus(); });
+  app.whenReady().then(() => {
+  try { setupFirstRun(); } catch (error) { dialog.showErrorBox('Grautam', error.message); app.quit(); return; }
   mainWindow = createWindow();
   installTray();
   nativeTheme.themeSource = 'dark';
@@ -160,4 +175,4 @@ app.whenReady().then(() => {
 });
 app.on('before-quit', () => { quitting = true; });
 app.on('window-all-closed', () => { /* A bandeja mantém o processo ativo. */ });
-app.on('second-instance', () => { mainWindow?.show(); mainWindow?.focus(); });
+}
