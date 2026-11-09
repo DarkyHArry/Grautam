@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, nativeTheme, Notification, Tray, Menu, shell, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeTheme, Notification, Tray, Menu, shell, dialog, screen } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { spawnSync } = require('node:child_process');
@@ -11,6 +11,8 @@ let mainWindow;
 let tray;
 let quitting = false;
 let lastNotice = '';
+const fullscreenBounds = new WeakMap();
+const navigationTimers = new WeakMap();
 const iconPath = app.isPackaged
   ? path.join(process.resourcesPath, 'assets', 'grautam.ico')
   : path.join(__dirname, '..', 'assets', 'grautam.ico');
@@ -27,6 +29,9 @@ function isValidDepartureDate(value) {
 
 function windows() { return BrowserWindow.getAllWindows().filter(w => !w.isDestroyed()); }
 function createWindow({ page = 'index.html', width = 1440, height = 960, minWidth = 1100, minHeight = 740, title = 'Grautam' } = {}) {
+  const { width: workWidth, height: workHeight } = screen.getPrimaryDisplay().workAreaSize;
+  width = Math.min(width, workWidth); height = Math.min(height, workHeight);
+  minWidth = Math.min(minWidth, width); minHeight = Math.min(minHeight, height);
   const win = new BrowserWindow({ width, height, minWidth, minHeight, resizable: false, maximizable: false, fullscreenable: true, center: true, frame: false, show: false, title, icon: iconPath,
     backgroundColor: '#000000', autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true }
@@ -34,7 +39,12 @@ function createWindow({ page = 'index.html', width = 1440, height = 960, minWidt
   win.setMenu(null);
   win.once('ready-to-show', () => win.show());
   win.on('enter-full-screen', () => win.webContents.send('window:fullscreen', true));
-  win.on('leave-full-screen', () => { win.center(); win.webContents.send('window:fullscreen', false); });
+  win.on('leave-full-screen', () => {
+    const bounds = fullscreenBounds.get(win);
+    if (bounds && !win.isDestroyed()) win.setBounds(bounds);
+    fullscreenBounds.delete(win);
+    win.webContents.send('window:fullscreen', false);
+  });
   win.on('close', event => { if (!quitting) { event.preventDefault(); win.hide(); if (mainWindow === win) showNotice('Grautam continua em execução na bandeja.'); } });
   win.webContents.setWindowOpenHandler(({ url }) => { if (url.startsWith('mailto:')) shell.openExternal(url); return { action: 'deny' }; });
   if (dev) win.loadFile(path.join(__dirname, 'renderer', page));
@@ -72,6 +82,7 @@ function navigateWindow(win, name) {
     dashboard: { page: 'index.html', title: 'Grautam — Visão geral' },
     bookings: { page: 'bookings.html', title: 'Grautam — Passagens' },
     schedule: { page: 'bookings.html', title: 'Grautam — Minhas viagens', hash: 'savedTrips' },
+    account: { page: 'account.html', title: 'Grautam — Minha conta' },
     partners: { page: 'partners.html', title: 'Grautam — Segurança' },
     support: { page: 'support.html', title: 'Grautam — Suporte' }
   };
@@ -79,13 +90,19 @@ function navigateWindow(win, name) {
   if (!route || !win || win.isDestroyed()) return false;
   win.setTitle(route.title);
   const options = route.hash ? { hash: route.hash } : undefined;
-  win.loadFile(path.join(__dirname, 'renderer', route.page), options);
-  win.show();
-  win.focus();
+  const previousTimer = navigationTimers.get(win);
+  if (previousTimer) clearTimeout(previousTimer);
+  win.webContents.executeJavaScript('document.body.classList.add("is-navigating")').catch(() => {});
+  const timer = setTimeout(() => {
+    navigationTimers.delete(win);
+    if (!win.isDestroyed()) win.loadFile(path.join(__dirname, 'renderer', route.page), options);
+  }, 110);
+  navigationTimers.set(win, timer);
+  win.show(); win.focus();
   return true;
 }
 
-const allowedChannels = new Set(['flights:live', 'trips:list', 'trips:save', 'trips:delete', 'settings:get', 'settings:set', 'notifications:list', 'notifications:clear', 'notice:create', 'booking:simulate', 'window:open', 'window:toggle-fullscreen', 'window:minimize', 'window:close', 'app:version', 'support:send', 'updates:check', 'notice:dismiss']);
+const allowedChannels = new Set(['flights:live', 'trips:list', 'trips:save', 'trips:delete', 'settings:get', 'settings:set', 'notifications:list', 'notifications:clear', 'notice:create', 'booking:simulate', 'window:open', 'window:toggle-fullscreen', 'window:minimize', 'window:close', 'app:version', 'support:send', 'updates:check', 'notice:dismiss', 'profile:get', 'profile:save', 'profile:clear']);
 ipcMain.handle('app:request', async (event, channel, payload) => {
   if (!allowedChannels.has(channel) || !windows().some(w => w.webContents.id === event.sender.id)) throw new Error('Solicitação não autorizada.');
   switch (channel) {
@@ -99,6 +116,9 @@ ipcMain.handle('app:request', async (event, channel, payload) => {
     case 'trips:delete': return data.deleteTrip(payload?.id);
     case 'settings:get': return data.getSettings();
     case 'settings:set': return data.setSettings(payload);
+    case 'profile:get': return data.getProfile();
+    case 'profile:save': return data.saveProfile(payload);
+    case 'profile:clear': data.clearProfile(); return true;
     case 'notifications:list': return data.listNotifications();
     case 'notifications:clear': data.clearNotifications(); return true;
     case 'notice:create': {
@@ -129,7 +149,7 @@ ipcMain.handle('app:request', async (event, channel, payload) => {
       return booking;
     }
     case 'window:open': return navigateWindow(BrowserWindow.fromWebContents(event.sender), payload?.name);
-    case 'window:toggle-fullscreen': { const win = BrowserWindow.fromWebContents(event.sender); if (!win) return false; const next = !win.isFullScreen(); win.setFullScreen(next); if (!next) win.center(); return next; }
+    case 'window:toggle-fullscreen': { const win = BrowserWindow.fromWebContents(event.sender); if (!win) return false; const next = !win.isFullScreen(); if (next) fullscreenBounds.set(win, win.getBounds()); win.setFullScreen(next); return next; }
     case 'window:minimize': BrowserWindow.fromWebContents(event.sender)?.minimize(); return true;
     case 'window:close': BrowserWindow.fromWebContents(event.sender)?.hide(); return true;
     case 'app:version': return app.getVersion();

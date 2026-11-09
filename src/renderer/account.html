@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'self'">
+<title>Grautam — Minha conta</title><link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css"><link rel="stylesheet" href="../../node_modules/bootstrap-icons/font/bootstrap-icons.min.css"><link rel="stylesheet" href="styles.css"></head>
+<body class="secondary-page account-page">
+<header class="app-titlebar secondary-titlebar"><div class="titlebar-drag"><img src="../../assets/grautam.ico" alt=""><span>Grautam</span><span class="titlebar-separator">—</span><span class="titlebar-section">Minha conta</span></div>
+<div class="window-controls"><button data-window="minimize" aria-label="Minimizar"><i class="bi bi-dash-lg"></i></button><button data-window="fullscreen" aria-label="Tela cheia"><i class="bi bi-fullscreen"></i></button><button data-window="close" aria-label="Fechar para bandeja" class="window-close"><i class="bi bi-x-lg"></i></button></div></header>
+<main class="secondary-shell"><header class="secondary-header"><a class="brand" href="index.html" data-navigate="dashboard"><img class="brand-mark-img" src="../../assets/grautam.ico" alt=""><span>grautam<small>CONTA DE PASSAGEIRO</small></span></a>
+<nav class="secondary-nav" aria-label="Navegação principal"><button data-navigate="dashboard">Visão geral</button><button data-navigate="bookings">Passagens</button><button data-navigate="schedule">Minhas viagens</button><button data-navigate="account" aria-current="page">Minha conta</button></nav>
+<button class="icon-button" data-open="support" aria-label="Suporte"><i class="bi bi-headset"></i></button></header>
+<section class="secondary-content account-content"><div class="account-lead"><div class="eyebrow">DADOS DO PASSAGEIRO</div><h1>Sua conta de viagem<span class="greeting-dot">.</span></h1><p>Salve suas informações para organizar futuras viagens neste dispositivo.</p></div>
+<form id="profileForm" class="account-card glass-panel" autocomplete="on"><div class="account-grid"><div class="account-fields">
+<label class="account-field full">NOME COMPLETO<input name="fullName" type="text" autocomplete="name" maxlength="100" placeholder="Como aparece no documento" required></label>
+<label class="account-field">E-MAIL<input name="email" type="email" autocomplete="email" maxlength="254" placeholder="voce@exemplo.com" required></label>
+<label class="account-field">TELEFONE COM DDI<input name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="+55 11 99999-9999" required></label>
+<label class="account-field">DATA DE NASCIMENTO<input name="birthDate" type="date" autocomplete="bday" required></label>
+<label class="account-field">NACIONALIDADE<input name="nationality" type="text" autocomplete="country-name" maxlength="60" placeholder="Brasileira" required></label>
+<label class="account-field">DOCUMENTO<select name="documentType" id="documentType" required><option value="CPF">CPF</option><option value="PASSAPORTE">Passaporte</option></select></label>
+<label class="account-field">NÚMERO DO DOCUMENTO<input name="documentNumber" id="documentNumber" type="text" autocomplete="off" maxlength="30" placeholder="000.000.000-00" required></label>
+</div><aside class="account-photo"><div class="account-avatar" id="avatarPreview" aria-label="Prévia da foto">G</div><b>Foto do perfil</b><small>PNG ou JPG. A imagem é ajustada no computador antes de ser salva.</small>
+<input id="avatarFile" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" hidden><div class="account-photo-actions"><button type="button" id="chooseAvatar">Escolher foto</button><button type="button" id="removeAvatar">Remover</button></div></aside></div>
+<div class="account-privacy"><i class="bi bi-shield-lock"></i><span>Seu perfil, documento e foto ficam neste computador, criptografados com a proteção do sistema operacional. O Grautam não envia esses dados para um servidor.</span></div>
+<div class="account-actions"><span class="account-message" id="profileMessage" role="status" aria-live="polite"></span><div class="d-flex gap-2 align-items-center"><button type="button" class="account-delete" id="deleteProfile" hidden>Excluir dados locais</button><button class="btn btn-grautam" id="saveProfile" type="submit"><i class="bi bi-check2"></i> Salvar perfil</button></div></div></form></section></main>
+<div class="toast-container position-fixed top-0 end-0 p-3" id="toastHost"></div><script src="account.js"></script><script src="window-controls.js"></script></body></html>

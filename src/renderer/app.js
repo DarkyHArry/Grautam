@@ -7,8 +7,18 @@ const now = new Date();
 $('#todayDate').textContent = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(now);
 $('#dateLabel').textContent = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(now).toUpperCase();
 api.request('app:version').then(version => { $('#appVersion').textContent = `Versão ${version}`; }).catch(() => {});
-let flightData = [], settings = {}, previousFlights = new Set(), noticeTimer;
+let flightData = [], settings = {}, previousFlights = new Set(), noticeTimer, flightRefreshTimer, systemTipTimer;
 function toast(message, type = 'success') { const item = document.createElement('div'); item.className = `toast align-items-center border-0 text-bg-${type} show`; item.setAttribute('role', 'status'); item.innerHTML = '<div class="d-flex"><div class="toast-body"></div><button type="button" class="btn-close btn-close-white me-2 m-auto"></button></div>'; item.querySelector('.toast-body').textContent = message; item.querySelector('button').onclick = () => item.remove(); $('#toastHost').append(item); setTimeout(() => item.remove(), 4500); }
+function renderAccountBadge(profile) {
+  if (!profile) return;
+  const name = $('#profileName'), subtitle = $('#profileSubtitle'), avatar = $('#profileAvatar');
+  if (name) name.textContent = profile.fullName;
+  if (subtitle) subtitle.textContent = profile.nationality;
+  if (avatar && profile.avatar) {
+    const image = document.createElement('img'); image.src = profile.avatar; image.alt = '';
+    avatar.replaceChildren(image);
+  } else if (avatar) avatar.textContent = profile.fullName.split(/\s+/).map(part => part[0]).slice(0,2).join('').toUpperCase();
+}
 function selectedCountries() { return settings.countries?.length ? settings.countries : ['Brazil']; }
 function renderCountryPicker() {
   const target = $('#countryChips'); if (!target) return;
@@ -58,6 +68,7 @@ function renderNotifications() {
 }
 $('#flightSearch').addEventListener('input', renderFlights); $('#flightFilter').addEventListener('change', renderFlights); $('#refreshFlights').addEventListener('click', refreshFlights);
 document.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: button.dataset.open })));
+api.request('profile:get').then(renderAccountBadge).catch(() => {});
 document.querySelectorAll('[data-view="bookings"]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: 'bookings' })));
 document.querySelectorAll('[data-view="schedule"]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: 'schedule' })));
 document.querySelectorAll('[data-view="dashboard"]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: 'dashboard' })));
@@ -68,6 +79,20 @@ $('#notificationToggle').addEventListener('change', async event => { settings.no
 $('#fullscreenButton').addEventListener('click', () => api.request('window:toggle-fullscreen'));
 document.addEventListener('click', event => { if (!event.target.closest('#notificationPopover') && !event.target.closest('#openNotifications') && !event.target.closest('[data-action="notifications"]')) $('#notificationPopover').classList.remove('show'); });
 document.querySelector('[data-dismiss="updates"]').addEventListener('click', async () => { $('#updateBanner').classList.add('dismissed'); settings.updates = false; await api.request('settings:set', settings); });
-api.request('settings:get').then(value => { settings = value; document.documentElement.dataset.theme = 'dark'; $('#notificationToggle').checked = settings.notifications; if (!settings.updates) $('#updateBanner').classList.add('dismissed'); renderCountryPicker(); updateFlightLocation(); renderNotifications(); refreshFlights(); });
-setInterval(() => { if (Math.random() < 0.18 && settings.notifications) addNotice({ type: 'system', title: 'Dica Grautam', message: ['Compare datas próximas para encontrar tarifas estimadas menores.', 'Salve sua viagem para consultar seu planejamento depois.', 'Confira os documentos exigidos antes de viajar.'][Math.floor(Math.random() * 3)] }); }, 180_000);
-setInterval(refreshFlights, 60_000);
+api.request('settings:get').then(value => { settings = value; document.documentElement.dataset.theme = 'dark'; $('#notificationToggle').checked = settings.notifications; if (!settings.updates) $('#updateBanner').classList.add('dismissed'); renderCountryPicker(); updateFlightLocation(); renderNotifications(); refreshFlights(); scheduleFlightRefresh(); scheduleSystemTip(); });
+function scheduleFlightRefresh() {
+  clearTimeout(flightRefreshTimer); if (document.hidden) return;
+  flightRefreshTimer = setTimeout(async () => { await refreshFlights(); scheduleFlightRefresh(); }, 60_000);
+}
+function scheduleSystemTip() {
+  clearTimeout(systemTipTimer); if (document.hidden) return;
+  systemTipTimer = setTimeout(() => {
+    if (Math.random() < 0.18 && settings.notifications) addNotice({ type: 'system', title: 'Dica Grautam', message: ['Compare datas próximas para encontrar tarifas estimadas menores.', 'Salve sua viagem para consultar seu planejamento depois.', 'Confira os documentos exigidos antes de viajar.'][Math.floor(Math.random() * 3)] });
+    scheduleSystemTip();
+  }, 180_000);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { clearTimeout(flightRefreshTimer); clearTimeout(systemTipTimer); }
+  else { refreshFlights(); scheduleFlightRefresh(); scheduleSystemTip(); }
+});
+scheduleSystemTip();

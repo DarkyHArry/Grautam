@@ -279,3 +279,42 @@ a{color:inherit}
  .secondary-content,.support-content{padding-top:16px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Conta local, transições discretas e economia de recursos */
+.profile-avatar{overflow:hidden;flex:0 0 30px}
+.profile-avatar img,.account-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.profile-label{min-width:0}
+.profile-label b,.profile-label small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-page{animation:grautam-arrive .24s ease-out both}
+.account-content{max-width:980px}
+.account-lead{margin-bottom:18px}
+.account-lead p{margin:6px 0 0;color:var(--muted);font-size:11px}
+.account-card{padding:20px}
+.account-grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:start}
+.account-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.account-field{display:block;color:#aaa4b0;font-size:9px;font-weight:700;letter-spacing:.65px}
+.account-field.full{grid-column:1/-1}
+.account-field input,.account-field select{display:block;width:100%;height:39px;margin-top:6px;padding:0 11px;border:1px solid var(--line-strong);border-radius:9px;background:#0c0c0e;color:var(--ink);font-size:11px;letter-spacing:0}
+.account-field input:focus,.account-field select:focus{border-color:#8064a7;outline:0;box-shadow:0 0 0 3px rgba(154,123,232,.12)}
+.account-field input::placeholder{color:#706a77}
+.account-field select option{background:#111114;color:var(--ink)}
+.account-photo{display:grid;justify-items:center;gap:11px;padding:18px 14px;border:1px solid var(--line);border-radius:12px;background:#0d0d10;text-align:center}
+.account-avatar{width:112px;height:112px;display:grid;place-items:center;overflow:hidden;border:1px solid #46385b;border-radius:50%;background:#241a31;color:#e7dcff;font:500 30px var(--font-display)}
+.account-photo b{font-size:11px}
+.account-photo small{max-width:200px;color:#89838f;font-size:9px;line-height:1.5}
+.account-photo-actions{display:flex;gap:7px}
+.account-photo-actions button{padding:7px 9px;border:1px solid var(--line-strong);border-radius:8px;background:#17151b;color:#d8d1e0;font-size:9px}
+.account-photo-actions button:hover{background:#211b2b}
+.account-privacy{display:flex;gap:9px;margin-top:16px;padding:11px;border:1px solid #24232a;border-radius:9px;background:#101012;color:#9d97a3;font-size:9px;line-height:1.5}
+.account-privacy i{color:#8ec5a8}
+.account-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px}
+.account-actions .account-message{min-height:17px;color:#8ec5a8;font-size:10px}
+.account-actions .account-message.error{color:#e79588}
+.account-delete{border:0;background:transparent;color:#aa7279;font-size:9px}
+.app-shell,.secondary-content{transition:opacity .12s ease,transform .12s ease}
+.app-shell,.secondary-shell{animation:grautam-arrive .22s ease-out both}
+body.is-navigating .app-shell,body.is-navigating .secondary-content{opacity:.35;transform:translateY(3px)}
+@keyframes grautam-arrive{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.account-grid{grid-template-columns:minmax(0,1fr) 190px}.account-avatar{width:86px;height:86px}}
+@media(max-width:700px){.account-grid{grid-template-columns:1fr}.account-photo{grid-row:1}.account-fields{grid-template-columns:1fr}.account-field.full{grid-column:auto}.account-actions{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.account-page,.app-shell,.secondary-shell{animation:none!important}}
