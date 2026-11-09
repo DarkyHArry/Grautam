@@ -8,6 +8,15 @@ const defaults = {
 };
 const store = new Store({ name: 'grautam-local', defaults, clearInvalidConfig: false });
 
+function isValidTripDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
+  const today = new Date();
+  return date.getTime() >= Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+}
+
 function validateTrip(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Registro inválido.');
   const trip = {
@@ -19,7 +28,7 @@ function validateTrip(value) {
   };
   if (!trip.origin || !trip.destination || trip.origin === trip.destination) throw new Error('Informe origem e destino diferentes.');
   if (!Number.isInteger(trip.passengers) || trip.passengers < 1 || trip.passengers > 9) throw new Error('O número de passageiros deve ser de 1 a 9.');
-  if (trip.date && !/^\d{4}-\d{2}-\d{2}$/.test(trip.date)) throw new Error('Data inválida.');
+  if (trip.date && !isValidTripDate(trip.date)) throw new Error('Informe uma data futura válida.');
   if (!trip.id) trip.id = `trip_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   return trip;
 }
