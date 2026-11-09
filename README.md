@@ -28,7 +28,7 @@ Requer Node.js 22. `npm ci` instala as dependências e `npm start` abre o aplica
 
 ## Download pelo GitHub
 
-O workflow **Build Grautam for Windows** compila o instalador em pushes para `main` e pode ser iniciado manualmente em **Actions**. O `.exe` fica disponível como artefato da execução por 30 dias. Para publicar um download permanente, crie e envie uma tag no formato `v1.0.1`; o workflow cria uma GitHub Release com o instalador anexado.
+O workflow **Build Grautam for Windows** compila o instalador em pushes para `main` e pode ser iniciado manualmente em **Actions**. O `.exe` fica disponível como artefato da execução por 30 dias. Para publicar um download permanente, crie e envie uma tag no formato `v1.0.1`. O workflow agora não publica automaticamente releases; o instalador fica disponível no Actions como artefato.
 
 ## Projeto SQL de aeroportos
 
