@@ -59,8 +59,8 @@ function renderNotifications() {
 $('#flightSearch').addEventListener('input', renderFlights); $('#flightFilter').addEventListener('change', renderFlights); $('#refreshFlights').addEventListener('click', refreshFlights);
 document.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: button.dataset.open })));
 document.querySelectorAll('[data-view="bookings"]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: 'bookings' })));
-document.querySelectorAll('[data-view="schedule"]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: 'bookings' })));
-document.querySelectorAll('[data-view="dashboard"]').forEach(button => button.addEventListener('click', () => location.reload()));
+document.querySelectorAll('[data-view="schedule"]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: 'schedule' })));
+document.querySelectorAll('[data-view="dashboard"]').forEach(button => button.addEventListener('click', () => api.request('window:open', { name: 'dashboard' })));
 document.querySelector('[data-action="notifications"]').addEventListener('click', () => $('#notificationPopover').classList.toggle('show'));
 $('#openNotifications').addEventListener('click', () => $('#notificationPopover').classList.toggle('show')); $('#closeNotifications').addEventListener('click', () => $('#notificationPopover').classList.remove('show'));
 $('#clearNotifications').addEventListener('click', async () => { await api.request('notifications:clear'); renderNotifications(); toast('Notificações removidas.'); });

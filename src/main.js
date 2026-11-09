@@ -10,7 +10,6 @@ const opensky = require('./services/opensky');
 let mainWindow;
 let tray;
 let quitting = false;
-let supportWindow;
 let lastNotice = '';
 const iconPath = app.isPackaged
   ? path.join(process.resourcesPath, 'assets', 'grautam.ico')
@@ -19,14 +18,14 @@ const dev = !app.isPackaged;
 
 function windows() { return BrowserWindow.getAllWindows().filter(w => !w.isDestroyed()); }
 function createWindow({ page = 'index.html', width = 1440, height = 960, minWidth = 1100, minHeight = 740, title = 'Grautam' } = {}) {
-  const win = new BrowserWindow({ width, height, minWidth, minHeight, maxWidth: width, maxHeight: height, resizable: false, maximizable: false, fullscreenable: true, frame: false, show: false, title, icon: iconPath,
+  const win = new BrowserWindow({ width, height, minWidth, minHeight, resizable: false, maximizable: false, fullscreenable: true, center: true, frame: false, show: false, title, icon: iconPath,
     backgroundColor: '#000000', autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true }
   });
   win.setMenu(null);
   win.once('ready-to-show', () => win.show());
   win.on('enter-full-screen', () => win.webContents.send('window:fullscreen', true));
-  win.on('leave-full-screen', () => win.webContents.send('window:fullscreen', false));
+  win.on('leave-full-screen', () => { win.center(); win.webContents.send('window:fullscreen', false); });
   win.on('close', event => { if (!quitting) { event.preventDefault(); win.hide(); if (mainWindow === win) showNotice('Grautam continua em execução na bandeja.'); } });
   win.webContents.setWindowOpenHandler(({ url }) => { if (url.startsWith('mailto:')) shell.openExternal(url); return { action: 'deny' }; });
   if (dev) win.loadFile(path.join(__dirname, 'renderer', page));
@@ -49,17 +48,29 @@ function installTray() {
   tray.setToolTip('Grautam — viagens aéreas');
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Abrir Grautam', click: () => { mainWindow.show(); mainWindow.focus(); } },
-    { label: 'Central de suporte', click: () => openSupport() },
+    { label: 'Central de suporte', click: () => navigateWindow(mainWindow, 'support') },
     { type: 'separator' },
     { label: 'Sair do Grautam', click: () => { quitting = true; app.quit(); } }
   ]));
   tray.on('double-click', () => { mainWindow.show(); mainWindow.focus(); });
   tray.on('click', () => { mainWindow.show(); mainWindow.focus(); });
 }
-function openSupport() {
-  if (supportWindow && !supportWindow.isDestroyed()) { supportWindow.show(); supportWindow.focus(); return; }
-  supportWindow = createWindow({ page: 'support.html', width: 820, height: 740, minWidth: 820, minHeight: 740, title: 'Grautam — Suporte' });
-  supportWindow.on('closed', () => { supportWindow = null; });
+function navigateWindow(win, name) {
+  const routes = {
+    dashboard: { page: 'index.html', title: 'Grautam — Visão geral' },
+    bookings: { page: 'bookings.html', title: 'Grautam — Passagens' },
+    schedule: { page: 'bookings.html', title: 'Grautam — Minhas viagens', hash: 'savedTrips' },
+    partners: { page: 'partners.html', title: 'Grautam — Segurança' },
+    support: { page: 'support.html', title: 'Grautam — Suporte' }
+  };
+  const route = routes[name];
+  if (!route || !win || win.isDestroyed()) return false;
+  win.setTitle(route.title);
+  const options = route.hash ? { hash: route.hash } : undefined;
+  win.loadFile(path.join(__dirname, 'renderer', route.page), options);
+  win.show();
+  win.focus();
+  return true;
 }
 
 const allowedChannels = new Set(['flights:live', 'trips:list', 'trips:save', 'trips:delete', 'settings:get', 'settings:set', 'notifications:list', 'notifications:clear', 'notice:create', 'booking:simulate', 'window:open', 'window:toggle-fullscreen', 'window:minimize', 'window:close', 'app:version', 'support:send', 'updates:check', 'notice:dismiss']);
@@ -105,8 +116,8 @@ ipcMain.handle('app:request', async (event, channel, payload) => {
       showNotice(notice.message, notice.title);
       return booking;
     }
-    case 'window:open': if (payload?.name === 'support') openSupport(); else if (payload?.name === 'bookings') createWindow({ page: 'bookings.html', width: 1160, height: 820, minWidth: 1100, minHeight: 740, title: 'Grautam — Passagens' }); else if (payload?.name === 'partners') createWindow({ page: 'partners.html', width: 960, height: 760, minWidth: 920, minHeight: 700, title: 'Grautam — Segurança' }); return true;
-    case 'window:toggle-fullscreen': { const win = BrowserWindow.fromWebContents(event.sender); if (win) win.setFullScreen(!win.isFullScreen()); return win?.isFullScreen() || false; }
+    case 'window:open': return navigateWindow(BrowserWindow.fromWebContents(event.sender), payload?.name);
+    case 'window:toggle-fullscreen': { const win = BrowserWindow.fromWebContents(event.sender); if (!win) return false; const next = !win.isFullScreen(); win.setFullScreen(next); if (!next) win.center(); return next; }
     case 'window:minimize': BrowserWindow.fromWebContents(event.sender)?.minimize(); return true;
     case 'window:close': BrowserWindow.fromWebContents(event.sender)?.hide(); return true;
     case 'app:version': return app.getVersion();
