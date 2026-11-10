@@ -3,6 +3,20 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { randomUUID } = require('node:crypto');
 
+// Tratamento global de exceções para máxima estabilidade
+process.on('uncaughtException', error => {
+  console.error('[Grautam Error] Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', reason => {
+  console.error('[Grautam Error] Unhandled Rejection:', reason);
+});
+
+// App User Model ID para notificações nativas no Windows
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.grautam.desktop');
+}
+
 if (!app.isPackaged) {
   app.setPath('userData', path.join(__dirname, '..', '.dev-user-data'));
 }
@@ -19,30 +33,48 @@ let tray;
 let quitting = false;
 let lastNotice = '';
 
-const iconPath = app.isPackaged
-  ? path.join(process.resourcesPath, 'assets', 'grautam.ico')
-  : path.join(__dirname, '..', 'assets', 'grautam.ico');
+function getAppIcon() {
+  const candidates = [
+    path.join(process.resourcesPath, 'assets', 'grautam.ico'),
+    path.join(__dirname, '..', 'assets', 'grautam.ico'),
+    path.join(__dirname, 'renderer', 'assets', 'grautam.ico')
+  ];
+  for (const c of candidates) {
+    try {
+      if (fs.existsSync(c)) return c;
+    } catch (_) {}
+  }
+  return undefined;
+}
+
+const iconPath = getAppIcon();
 
 function showNotice(body, title = 'Grautam Viagens') {
-  const settings = data.getSettings();
-  if (!settings.notifications || !Notification.isSupported()) return;
-  const key = `${title}:${body}`;
-  if (key === lastNotice) return;
-  lastNotice = key;
-  const notice = new Notification({ title, body, icon: iconPath, silent: false });
-  notice.on('click', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
-  notice.show();
-  setTimeout(() => { if (lastNotice === key) lastNotice = ''; }, 6000);
+  try {
+    const settings = data.getSettings();
+    if (!settings.notifications || !Notification.isSupported()) return;
+    const key = `${title}:${body}`;
+    if (key === lastNotice) return;
+    lastNotice = key;
+    const options = { title, body, silent: false };
+    if (iconPath) options.icon = iconPath;
+    const notice = new Notification(options);
+    notice.on('click', () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    });
+    notice.show();
+    setTimeout(() => { if (lastNotice === key) lastNotice = ''; }, 6000);
+  } catch (err) {
+    console.error('Falha ao exibir notificação:', err);
+  }
 }
 
 function createWindow() {
-  const win = new BrowserWindow({
+  const windowOptions = {
     width: 1320,
     height: 860,
     minWidth: 1040,
@@ -54,7 +86,6 @@ function createWindow() {
     frame: false,
     show: false,
     title: 'Grautam — Vendas de Passagens Aéreas',
-    icon: iconPath,
     backgroundColor: '#181816',
     autoHideMenuBar: true,
     webPreferences: {
@@ -64,8 +95,13 @@ function createWindow() {
       sandbox: true,
       webSecurity: true
     }
-  });
+  };
 
+  if (iconPath) {
+    windowOptions.icon = iconPath;
+  }
+
+  const win = new BrowserWindow(windowOptions);
   win.setMenu(null);
 
   win.once('ready-to-show', () => {
@@ -92,13 +128,13 @@ function createWindow() {
     if (!quitting) {
       event.preventDefault();
       win.hide();
-      showNotice('Grautam continua rodando na bandeja do sistema.');
+      showNotice('Grautam continua em execução na bandeja do sistema.');
     }
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('mailto:') || url.startsWith('https://')) {
-      shell.openExternal(url);
+      shell.openExternal(url).catch(err => console.error('Erro ao abrir link externo:', err));
     }
     return { action: 'deny' };
   });
@@ -108,43 +144,47 @@ function createWindow() {
 }
 
 function installTray() {
-  if (tray) return;
-  tray = new Tray(iconPath);
-  tray.setToolTip('Grautam — Passagens e Viagens');
-  tray.setContextMenu(Menu.buildFromTemplate([
-    {
-      label: 'Abrir Grautam Viagens',
-      click: () => {
-        if (mainWindow) {
-          if (mainWindow.isMinimized()) mainWindow.restore();
-          mainWindow.show();
-          mainWindow.focus();
+  if (tray || !iconPath) return;
+  try {
+    tray = new Tray(iconPath);
+    tray.setToolTip('Grautam — Passagens e Viagens');
+    tray.setContextMenu(Menu.buildFromTemplate([
+      {
+        label: 'Abrir Grautam Viagens',
+        click: () => {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.show();
+            mainWindow.focus();
+          }
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Encerrar Grautam',
+        click: () => {
+          quitting = true;
+          app.quit();
         }
       }
-    },
-    { type: 'separator' },
-    {
-      label: 'Encerrar Grautam',
-      click: () => {
-        quitting = true;
-        app.quit();
+    ]));
+
+    tray.on('double-click', () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.show();
+        mainWindow.focus();
       }
-    }
-  ]));
+    });
 
-  tray.on('double-click', () => {
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
-
-  tray.on('click', () => {
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
+    tray.on('click', () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    });
+  } catch (err) {
+    console.error('Falha ao instalar bandeja:', err);
+  }
 }
 
 const ALLOWED_CHANNELS = new Set([
@@ -152,6 +192,11 @@ const ALLOWED_CHANNELS = new Set([
   'flights:deals',
   'flights:status',
   'flights:airports',
+  'currency:convert',
+  'currency:list',
+  'analytics:get',
+  'calendar:export',
+  'receipt:html',
   'bookings:list',
   'bookings:create',
   'bookings:cancel',
@@ -334,32 +379,43 @@ ipcMain.handle('app:request', async (event, channel, payload) => {
   }
 });
 
-app.whenReady().then(() => {
-  const lock = app.requestSingleInstanceLock();
-  if (!lock) {
-    app.quit();
-    return;
-  }
+// Single instance lock verificado antes do ready
+const gotTheLock = app.requestSingleInstanceLock();
 
+if (!gotTheLock) {
+  app.quit();
+} else {
   app.on('second-instance', () => {
-    if (mainWindow) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
       mainWindow.focus();
     }
   });
 
-  mainWindow = createWindow();
-  installTray();
-  nativeTheme.themeSource = 'dark';
+  app.whenReady().then(() => {
+    mainWindow = createWindow();
+    installTray();
+    nativeTheme.themeSource = 'dark';
 
-  app.on('activate', () => {
-    if (mainWindow.isVisible()) {
-      mainWindow.focus();
-    } else {
-      mainWindow.show();
-    }
+    app.on('activate', () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        if (mainWindow.isVisible()) {
+          mainWindow.focus();
+        } else {
+          mainWindow.show();
+        }
+      } else {
+        mainWindow = createWindow();
+      }
+    });
   });
+}
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin' && quitting) {
+    app.quit();
+  }
 });
 
 app.on('before-quit', () => {
