@@ -484,6 +484,18 @@ $('#btnPrintTicket').addEventListener('click', () => {
   window.print();
 });
 
+$('#closeReceiptModal')?.addEventListener('click', () => {
+  $('#receiptModal').classList.remove('show');
+});
+
+$('#btnCloseReceipt')?.addEventListener('click', () => {
+  $('#receiptModal').classList.remove('show');
+});
+
+$('#btnPrintReceipt')?.addEventListener('click', () => {
+  window.print();
+});
+
 // ==========================================================================
 // MY BOOKINGS & TICKETS LIST
 // ==========================================================================
@@ -553,6 +565,9 @@ async function loadBookings() {
           <button type="button" class="btn-boarding-pass view-pass-btn" data-pnr="${b.pnr}">
             <i class="bi bi-qr-code"></i> Cartão de Embarque
           </button>
+          <button type="button" class="btn-boarding-pass view-receipt-btn" data-pnr="${b.pnr}" title="Ver Recibo Fiscal">
+            <i class="bi bi-file-earmark-text"></i> Recibo
+          </button>
           ${b.status !== 'CANCELADO' ? `
             <button type="button" class="btn-cancel-ticket cancel-ticket-btn" data-id="${b.id}" title="Cancelar Reserva">
               <i class="bi bi-x-circle"></i>
@@ -568,6 +583,18 @@ async function loadBookings() {
         const pnr = btn.dataset.pnr;
         const b = bookings.find(item => item.pnr === pnr);
         if (b) openBoardingPassModal(b);
+      });
+    });
+
+    container.querySelectorAll('.view-receipt-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const pnr = btn.dataset.pnr;
+        const b = bookings.find(item => item.pnr === pnr);
+        if (b) {
+          const html = await api.request('receipt:html', b);
+          $('#receiptModalBody').innerHTML = html;
+          $('#receiptModal').classList.add('show');
+        }
       });
     });
 

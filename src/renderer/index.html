@@ -770,6 +770,29 @@
     </div>
   </div>
 
+  <!-- RECEIPT MODAL -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Comprovante e Recibo Fiscal</h3>
+        <button type="button" class="modal-close-btn" id="closeReceiptModal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="receiptModalBody">
+        <!-- Receipt content populated -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-select-flight" style="width: auto; background: var(--bg-surface); border: 1px solid var(--border-medium); color: var(--text-primary);" id="btnPrintReceipt">
+          <i class="bi bi-printer"></i> Imprimir Recibo
+        </button>
+        <button type="button" class="btn-confirm-checkout" id="btnCloseReceipt">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- NOTIFICATIONS POPOVER -->
   <div class="notification-popover" id="notifPopover">
     <div class="notif-header">
