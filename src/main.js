@@ -24,6 +24,7 @@ if (!app.isPackaged) {
 const data = require('./services/store');
 const flights = require('./services/flights');
 const currency = require('./services/currency');
+const liveFlights = require('./services/liveFlights');
 const analytics = require('./services/analytics');
 const calendar = require('./services/calendar');
 const receipt = require('./services/receipt');
@@ -86,14 +87,16 @@ function createWindow() {
     frame: false,
     show: false,
     title: 'Grautam — Vendas de Passagens Aéreas',
-    backgroundColor: '#181816',
+    backgroundColor: '#0e001c',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
-      webSecurity: true
+      webSecurity: true,
+      backgroundThrottling: true,
+      spellcheck: false
     }
   };
 
@@ -191,9 +194,11 @@ const ALLOWED_CHANNELS = new Set([
   'flights:search',
   'flights:deals',
   'flights:status',
+  'flights:live',
   'flights:airports',
   'currency:convert',
   'currency:list',
+  'currency:rates',
   'analytics:get',
   'calendar:export',
   'receipt:html',
@@ -235,11 +240,17 @@ ipcMain.handle('app:request', async (event, channel, payload) => {
     case 'flights:status':
       return flights.getFlightStatus(payload?.query);
 
+    case 'flights:live':
+      return liveFlights.fetchLiveFlights(payload?.bounds);
+
     case 'flights:airports':
       return flights.getAirports();
 
     case 'currency:list':
       return currency.getAvailableCurrencies();
+
+    case 'currency:rates':
+      return currency.fetchLiveExchangeRates();
 
     case 'currency:convert':
       return {

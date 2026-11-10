@@ -4,7 +4,7 @@ const path = require('node:path');
 
 console.log('=== INICIANDO SUÍTE DE TESTES DO GRAUTAM ===\n');
 
-const testFiles = ['flights.test.js', 'store.test.js'];
+const testFiles = ['flights.test.js', 'store.test.js', 'liveFlights.test.js'];
 let passed = 0;
 
 for (const file of testFiles) {
