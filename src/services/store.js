@@ -1,134 +1,233 @@
 const StoreModule = require('electron-store');
-const { safeStorage } = require('electron');
 const Store = StoreModule.default || StoreModule;
+const { randomUUID } = require('node:crypto');
 
 const defaults = {
-  settings: { theme: 'amoled', notifications: true, updates: true, countries: ['Brazil'], airline: 'LATAM' },
-  trips: [], bookings: [], supportDrafts: [], notifications: [], dismissed: [],
+  settings: {
+    theme: 'dark',
+    notifications: true,
+    currency: 'BRL',
+    passengerName: 'Carlos Silveira',
+    passengerDoc: '284.912.840-12',
+    passengerEmail: 'carlos.silveira@grautam.com.br',
+    passengerPhone: '(11) 98765-4321',
+    preferredAirline: 'LATAM Airlines'
+  },
+  trips: [
+    {
+      id: 'trip_demo_1',
+      origin: 'São Paulo (GRU)',
+      destination: 'Rio de Janeiro (GIG)',
+      date: new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10),
+      passengers: 1,
+      notes: 'Planejamento de final de semana',
+      createdAt: Date.now() - 3600000 * 24
+    }
+  ],
+  bookings: [
+    {
+      id: 'book_initial_1',
+      pnr: 'GTM-78241',
+      eticket: '042-89210948',
+      flightNumber: 'LA 3012',
+      airline: 'LATAM Airlines',
+      origin: 'São Paulo (GRU)',
+      originCode: 'GRU',
+      originCity: 'São Paulo',
+      originTerminal: 'Terminal 3',
+      destination: 'Rio de Janeiro (GIG)',
+      destinationCode: 'GIG',
+      destinationCity: 'Rio de Janeiro',
+      destinationTerminal: 'Terminal 2',
+      date: new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 10),
+      departureTime: '06:15',
+      arrivalTime: '07:25',
+      duration: '1h 10m',
+      cabinClass: 'Econômica',
+      seat: '12A',
+      gate: 'B12',
+      baggage: '1x Mala de mão (10kg) inclusa',
+      passengers: [
+        {
+          name: 'Carlos Silveira',
+          document: '284.912.840-12',
+          seat: '12A'
+        }
+      ],
+      paymentMethod: 'PIX',
+      total: 349.00,
+      status: 'CONFIRMADO',
+      createdAt: Date.now() - 86400000 * 2
+    }
+  ],
+  supportDrafts: [],
+  notifications: [
+    {
+      id: 'notice_welcome',
+      type: 'system',
+      title: 'Bem-vindo ao Grautam Viagens',
+      message: 'Sistema comercial de busca, reserva e emissão de passagens aéreas pronto.',
+      createdAt: Date.now(),
+      read: false
+    }
+  ],
   schemaVersion: 2
 };
+
 const store = new Store({ name: 'grautam-local', defaults, clearInvalidConfig: false });
 
-function isValidTripDate(value) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
-  const today = new Date();
-  return date.getTime() >= Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+function listBookings() {
+  return store.get('bookings', []);
 }
 
+function saveBooking(raw) {
+  if (!raw || typeof raw !== 'object') throw new Error('Dados de reserva inválidos.');
+  
+  const id = raw.id || `book_${randomUUID().slice(0, 8)}`;
+  const pnr = raw.pnr || `GTM-${Math.floor(10000 + Math.random() * 90000)}`;
+  const eticket = raw.eticket || `042-${Math.floor(10000000 + Math.random() * 90000000)}`;
+  
+  const booking = {
+    id,
+    pnr,
+    eticket,
+    flightNumber: String(raw.flightNumber || 'GT 1000').slice(0, 20),
+    airline: String(raw.airline || 'Grautam Airlines').slice(0, 50),
+    origin: String(raw.origin || 'São Paulo (GRU)').slice(0, 80),
+    originCode: String(raw.originCode || 'GRU').slice(0, 5),
+    originCity: String(raw.originCity || 'São Paulo').slice(0, 50),
+    originTerminal: String(raw.originTerminal || 'Terminal 1').slice(0, 30),
+    destination: String(raw.destination || 'Rio de Janeiro (GIG)').slice(0, 80),
+    destinationCode: String(raw.destinationCode || 'GIG').slice(0, 5),
+    destinationCity: String(raw.destinationCity || 'Rio de Janeiro').slice(0, 50),
+    destinationTerminal: String(raw.destinationTerminal || 'Terminal 1').slice(0, 30),
+    date: String(raw.date || new Date().toISOString().slice(0, 10)).slice(0, 10),
+    departureTime: String(raw.departureTime || '08:00').slice(0, 10),
+    arrivalTime: String(raw.arrivalTime || '09:15').slice(0, 10),
+    duration: String(raw.duration || '1h 15m').slice(0, 20),
+    cabinClass: String(raw.cabinClass || 'Econômica').slice(0, 30),
+    seat: String(raw.seat || '14C').slice(0, 10),
+    gate: String(raw.gate || `A${Math.floor(1 + Math.random() * 20)}`).slice(0, 10),
+    baggage: String(raw.baggage || 'Mala de mão 10kg inclusa').slice(0, 80),
+    extras: Array.isArray(raw.extras) ? raw.extras.map(e => String(e).slice(0, 50)) : [],
+    passengers: Array.isArray(raw.passengers) && raw.passengers.length ? raw.passengers.map(p => ({
+      name: String(p.name || 'Passageiro').trim().slice(0, 80),
+      document: String(p.document || '').trim().slice(0, 40),
+      seat: String(p.seat || raw.seat || '12A').slice(0, 10)
+    })) : [
+      {
+        name: String(raw.passengerName || 'Passageiro Titular').trim().slice(0, 80),
+        document: String(raw.passengerDoc || '').trim().slice(0, 40),
+        seat: String(raw.seat || '14C').slice(0, 10)
+      }
+    ],
+    paymentMethod: ['PIX', 'Cartão de Crédito', 'Boleto'].includes(raw.paymentMethod) ? raw.paymentMethod : 'PIX',
+    installments: String(raw.installments || '1x').slice(0, 40),
+    total: Math.max(1, Number(raw.total) || 100),
+    status: 'CONFIRMADO',
+    createdAt: Date.now()
+  };
 
-const MAX_AVATAR_BYTES = 1.5 * 1024 * 1024;
-function ensureProfileEncryption() {
-  if (!safeStorage.isEncryptionAvailable()) throw new Error('O sistema não disponibilizou criptografia segura. Nenhum dado do perfil foi salvo.');
-  if (process.platform === 'linux' && safeStorage.getSelectedStorageBackend?.() === 'basic_text') throw new Error('Configure o armazenamento seguro do sistema antes de salvar dados pessoais.');
+  const list = listBookings().filter(b => b.id !== booking.id);
+  store.set('bookings', [booking, ...list].slice(0, 200));
+  return booking;
 }
-function readDate(value) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-  const [year, month, day] = value.split('-').map(Number), date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? date : null;
+
+function cancelBooking(id) {
+  if (!id) throw new Error('ID da reserva não informado.');
+  const list = listBookings();
+  const target = list.find(b => b.id === id || b.pnr === id);
+  if (!target) throw new Error('Reserva não encontrada.');
+  target.status = 'CANCELADO';
+  store.set('bookings', list);
+  return target;
 }
-function isValidCpf(value) {
-  const digits = String(value || '').replace(/\D/g, '');
-  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
-  for (let position = 9; position <= 10; position++) {
-    let sum = 0;
-    for (let index = 0; index < position; index++) sum += Number(digits[index]) * (position + 1 - index);
-    const check = (sum * 10) % 11;
-    if (Number(digits[position]) !== (check === 10 ? 0 : check)) return false;
-  }
-  return true;
-}
-function validateProfile(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Perfil inválido.');
-  const fullName = String(value.fullName || '').trim().replace(/\s+/g, ' ').slice(0, 100);
-  const email = String(value.email || '').trim().toLowerCase().slice(0, 254);
-  const phone = String(value.phone || '').trim().slice(0, 30), phoneDigits = phone.replace(/\D/g, '');
-  const birthDate = String(value.birthDate || ''), parsedBirthDate = readDate(birthDate), today = new Date();
-  const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-  const ageMs = parsedBirthDate ? todayUtc - parsedBirthDate.getTime() : -1;
-  const nationality = String(value.nationality || '').trim().replace(/\s+/g, ' ').slice(0, 60);
-  const documentType = ['CPF', 'PASSAPORTE'].includes(value.documentType) ? value.documentType : '';
-  const rawDocument = String(value.documentNumber || '').trim().toUpperCase().slice(0, 30);
-  const documentNumber = documentType === 'CPF' ? rawDocument.replace(/\D/g, '') : rawDocument.replace(/\s/g, '');
-  if ((fullName.match(/\p{L}+/gu) || []).length < 2) throw new Error('Informe seu nome completo.');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Informe um e-mail válido.');
-  if (phoneDigits.length < 8 || phoneDigits.length > 15 || !/^[+0-9() .-]+$/.test(phone)) throw new Error('Informe um telefone válido com código do país.');
-  if (!parsedBirthDate || ageMs < 0 || ageMs / (365.2425 * 86400000) > 120) throw new Error('Informe uma data de nascimento válida.');
-  if (!/^[\p{L}][\p{L} .'-]{1,59}$/u.test(nationality)) throw new Error('Informe sua nacionalidade.');
-  if (!documentType) throw new Error('Selecione CPF ou passaporte.');
-  if (documentType === 'CPF' && !isValidCpf(documentNumber)) throw new Error('O CPF informado não passou na validação.');
-  if (documentType === 'PASSAPORTE' && !/^[A-Z0-9][A-Z0-9-]{4,19}$/.test(documentNumber)) throw new Error('Informe um número de passaporte válido.');
-  let avatar = value.avatar == null || value.avatar === '' ? null : String(value.avatar);
-  if (avatar) {
-    const match = avatar.match(/^data:image\/(png|jpeg);base64,([A-Za-z0-9+/]+={0,2})$/);
-    if (!match) throw new Error('A foto deve ser um PNG ou JPG válido.');
-    const bytes = Buffer.from(match[2], 'base64');
-    if (!bytes.length || bytes.length > MAX_AVATAR_BYTES || bytes.toString('base64') !== match[2]) throw new Error('A foto deve ter no máximo 1,5 MB após a otimização.');
-    const pngSignature = Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
-    const isPng = match[1] === 'png' && bytes.subarray(0,8).equals(pngSignature);
-    const isJpeg = match[1] === 'jpeg' && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-    if (!isPng && !isJpeg) throw new Error('O conteúdo da imagem não corresponde ao formato declarado.');
-    avatar = 'data:image/' + match[1] + ';base64,' + match[2];
-  }
-  return { fullName,email,phone,birthDate,nationality,documentType,documentNumber,avatar,updatedAt:new Date().toISOString() };
-}
-function getProfile() {
-  const encrypted = store.get('profileEncrypted');
-  if (!encrypted) return null;
-  ensureProfileEncryption();
-  try { return JSON.parse(safeStorage.decryptString(Buffer.from(encrypted,'base64'))); }
-  catch { throw new Error('Não foi possível abrir o perfil protegido deste dispositivo.'); }
-}
-function saveProfile(value) {
-  ensureProfileEncryption();
-  const profile = validateProfile(value);
-  store.set('profileEncrypted', safeStorage.encryptString(JSON.stringify(profile)).toString('base64'));
-  return profile;
-}
-function clearProfile() { store.delete('profileEncrypted'); }
 
 function validateTrip(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Registro inválido.');
   const trip = {
-    id: typeof value.id === 'string' ? value.id.slice(0, 80) : '',
+    id: typeof value.id === 'string' ? value.id.slice(0, 80) : `trip_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     origin: typeof value.origin === 'string' ? value.origin.trim().slice(0, 80) : '',
     destination: typeof value.destination === 'string' ? value.destination.trim().slice(0, 80) : '',
     date: typeof value.date === 'string' ? value.date.slice(0, 20) : '',
-    passengers: Number(value.passengers), createdAt: Number(value.createdAt) || Date.now()
+    passengers: Number(value.passengers) || 1,
+    notes: typeof value.notes === 'string' ? value.notes.slice(0, 200) : '',
+    createdAt: Number(value.createdAt) || Date.now()
   };
   if (!trip.origin || !trip.destination || trip.origin === trip.destination) throw new Error('Informe origem e destino diferentes.');
   if (!Number.isInteger(trip.passengers) || trip.passengers < 1 || trip.passengers > 9) throw new Error('O número de passageiros deve ser de 1 a 9.');
-  if (trip.date && !isValidTripDate(trip.date)) throw new Error('Informe uma data futura válida.');
-  if (!trip.id) trip.id = `trip_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   return trip;
 }
 
-function safeSettings(value = {}) {
-  const countries = Array.isArray(value.countries) ? value.countries.filter(c => typeof c === 'string').slice(0, 20) : ['Brazil'];
-  const airlines = ['LATAM', 'Azul', 'GOL', 'Avianca', 'Copa Airlines', 'Iberia', 'Air France', 'Lufthansa'];
-  const notifications = value.notifications !== false;
-  return { theme: 'amoled', notifications, updates: value.updates !== false, countries, airline: airlines.includes(value.airline) ? value.airline : 'LATAM' };
+function listTrips() {
+  return store.get('trips', []);
 }
-function listNotifications() { return store.get('notifications', []).slice(0, 100); }
-function addNotification(input) {
-  const item = { id: String(input?.id || `notice_${Date.now()}`).slice(0, 100), type: ['system', 'purchase', 'flight'].includes(input?.type) ? input.type : 'system', title: String(input?.title || 'Grautam').slice(0, 100), message: String(input?.message || '').slice(0, 500), createdAt: Number(input?.createdAt) || Date.now(), read: false };
-  store.set('notifications', [item, ...listNotifications()].slice(0, 100));
-  return item;
-}
-function clearNotifications() { store.set('notifications', []); }
-function listTrips() { return store.get('trips', []); }
+
 function saveTrip(value) {
   const trip = validateTrip(value);
   const rows = listTrips().filter(item => item.id !== trip.id);
-  store.set('trips', [trip, ...rows].slice(0, 500));
+  store.set('trips', [trip, ...rows].slice(0, 200));
   return trip;
 }
+
 function deleteTrip(id) {
   if (typeof id !== 'string') throw new Error('Identificador inválido.');
   store.set('trips', listTrips().filter(item => item.id !== id));
 }
-function getSettings() { return safeSettings(store.get('settings', {})); }
-function setSettings(value) { const settings = safeSettings({ ...getSettings(), ...value }); store.set('settings', settings); return settings; }
-module.exports = { store, listTrips, saveTrip, deleteTrip, getSettings, setSettings, listNotifications, addNotification, clearNotifications, getProfile, saveProfile, clearProfile };
+
+function listNotifications() {
+  return store.get('notifications', []).slice(0, 100);
+}
+
+function addNotification(input) {
+  const item = {
+    id: String(input?.id || `notice_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`).slice(0, 100),
+    type: ['system', 'purchase', 'flight'].includes(input?.type) ? input.type : 'system',
+    title: String(input?.title || 'Grautam Viagens').slice(0, 100),
+    message: String(input?.message || '').slice(0, 500),
+    createdAt: Number(input?.createdAt) || Date.now(),
+    read: false
+  };
+  store.set('notifications', [item, ...listNotifications()].slice(0, 100));
+  return item;
+}
+
+function clearNotifications() {
+  store.set('notifications', []);
+}
+
+function getSettings() {
+  const s = store.get('settings', defaults.settings);
+  return {
+    theme: 'dark',
+    notifications: s.notifications !== false,
+    currency: 'BRL',
+    passengerName: s.passengerName || 'Carlos Silveira',
+    passengerDoc: s.passengerDoc || '284.912.840-12',
+    passengerEmail: s.passengerEmail || 'carlos.silveira@grautam.com.br',
+    passengerPhone: s.passengerPhone || '(11) 98765-4321',
+    preferredAirline: s.preferredAirline || 'LATAM Airlines'
+  };
+}
+
+function setSettings(value) {
+  const current = getSettings();
+  const next = { ...current, ...(value || {}) };
+  store.set('settings', next);
+  return next;
+}
+
+module.exports = {
+  store,
+  listBookings,
+  saveBooking,
+  cancelBooking,
+  listTrips,
+  saveTrip,
+  deleteTrip,
+  listNotifications,
+  addNotification,
+  clearNotifications,
+  getSettings,
+  setSettings
+};

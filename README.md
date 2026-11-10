@@ -1,40 +1,39 @@
-# Grautam
+# Grautam — Sistema de Vendas de Passagens Aéreas
 
-Aplicativo desktop em Electron para acompanhar tráfego aéreo, planejar viagens e simular reservas. A interface usa Bootstrap e mantém os dados pessoais e preferências no dispositivo.
+Aplicativo desktop em Electron para pesquisa, venda e emissão de passagens aéreas nacionais e internacionais. A interface segue a identidade visual **Claude Code** (paleta obsidian aconchegante, acentos terracota, tipografia editorial e fontes monoespaçadas para códigos IATA, PNR e tarifas).
 
-## Funcionalidades
+## Funcionalidades Principais
 
-- Painel de tráfego ADS-B, agenda, passagens, notificações, parceiros e suporte.
-- Simulação local de pesquisa, compra e formas de pagamento; reservas demonstrativas não são transações reais.
-- Tema escuro e notificações que podem ser gerenciadas pelo usuário.
-- Perfil local de passageiro com nome, contato, nascimento, nacionalidade e CPF/passaporte validados; dados e foto PNG/JPG são protegidos pela criptografia nativa do sistema operacional.
-- Avatar otimizado no dispositivo (limite de 1,5 MB) e nome/foto exibidos no painel principal; o perfil pode ser atualizado ou excluído localmente.
-- Transições sutis entre telas, respeito à preferência por movimento reduzido e pausa das consultas/dicas quando a janela fica oculta para reduzir atividade em segundo plano.
-- Armazenamento local validado, janelas auxiliares e opção para continuar na bandeja ao fechar a janela.
-- Cliente OpenSky isolado no processo principal, com cache e intervalo de consulta conservador.
+- **Pesquisa e Venda de Passagens**: busca rápida por cidades e códigos IATA (GRU, GIG, BSB, SSA, LIS, MIA, etc.), opções de ida/volta e só ida, classes Econômica, Premium e Executiva, além de filtros por companhia aérea e voos diretos.
+- **Mapa de Assentos Interativo**: escolha visual de assentos em aeronaves (janela, meio e corredor) com indicação de assentos disponíveis e ocupados.
+- **Checkout & Emissão Instantânea**: suporte a PIX com desconto automático de 5% e chave copia-e-cola/QR Code, Cartão de Crédito com parcelamento em até 12x sem juros e Boleto Bancário.
+- **Minhas Reservas & Bilhetes**: controle de bilhetes emitidos, códigos localizadores PNR (`GTM-XXXXX`), status da reserva e cancelamento com estorno.
+- **Cartão de Embarque Digital (Boarding Pass)**: visualização e impressão de cartão de embarque completo com dados do passageiro, voo, portão, terminal, assento e código de barras / QR Code.
+- **Ofertas do Dia & Destinos em Alta**: vitrine de tarifas promocionais com preenchimento e busca imediata com um clique.
+- **Rastreador de Voos Comerciais**: consulta de status em tempo real, horários previstos e portões de embarque.
+- **Central de Atendimento ao Passageiro**: FAQ sobre franquia de bagagem (normas ANAC), cancelamentos e envio de chamados.
+- **Janela e Controles Customizados**: barra de título frameless moderna, redimensionável, com controles nativos de minimizar, maximizar/restaurar e integração com a bandeja do sistema (tray).
 
-## Organização
+## Estrutura do Projeto
 
-- `src/main.js`: janelas, ciclo de vida, bandeja e validação de IPC.
-- `src/preload.js`: ponte IPC mínima e isolada.
-- `src/services/`: armazenamento validado e criptografado para perfil local, mais cliente OpenSky.
-- `src/renderer/`: interface Bootstrap, estilos e lógica das telas.
-- `assets/`: recursos visuais usados no aplicativo.
+- `src/main.js`: processo principal Electron, ciclo de vida da aplicação, bandeja do sistema e validação segura de IPC.
+- `src/preload.js`: ponte de comunicação segura e isolada entre processos.
+- `src/services/store.js`: gerenciamento persistente local de reservas, passagens, notificações e preferências via `electron-store`.
+- `src/services/flights.js`: motor comercial de rotas, tarifas dinâmicas, companhias aéreas e ofertas.
+- `src/renderer/`: interface do usuário unificada (SPA), estilos Claude Code (`styles.css`), controle de janelas (`window-controls.js`) e lógica de interação (`app.js`).
+- `assets/`: ícones e recursos visuais do Grautam.
 
-## Dados e segurança
+## Execução e Empacotamento
 
-OpenSky fornece posições e estados ADS-B; não fornece confirmação comercial de horários, cancelamentos, assentos, reservas ou modelos de aeronave. A interface identifica informações demonstrativas. Reservas e pagamentos são simulações locais: para vender passagens, é necessário integrar um provedor autorizado e um backend de reservas/pagamentos. Não coloque segredos de API no renderer.
+Requer Node.js 22.
 
-Dados de perfil e foto são mantidos neste computador com `safeStorage` do Electron. O aplicativo recusa salvar dados pessoais se o sistema não disponibilizar uma camada de criptografia segura. O perfil local não representa autenticação de servidor.
+```bash
+# Instalar dependências
+npm install
 
-## Desenvolvimento local
+# Iniciar em ambiente de desenvolvimento
+npm start
 
-Requer Node.js 22. `npm ci` instala as dependências e `npm start` abre o aplicativo. `npm run dist` gera o instalador NSIS para Windows, `dist/Grautam Setup.exe`.
-
-## Download pelo GitHub
-
-O workflow **Build Grautam for Windows** compila o instalador em pushes para `main` e pode ser iniciado manualmente em **Actions**. O `.exe` fica disponível como artefato da execução por 30 dias. Para publicar um download permanente, crie e envie uma tag no formato `v1.0.1`. O workflow agora não publica automaticamente releases; o instalador fica disponível no Actions como artefato.
-
-## Projeto SQL de aeroportos
-
-Os arquivos `Airport.session.sql` e `schema.sql` existentes neste repositório documentam o projeto relacional de aeroportos, aeronaves, voos, clientes e reservas.
+# Gerar instalador executável para Windows (NSIS)
+npm run dist
+```

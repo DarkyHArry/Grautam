@@ -1,21 +1,712 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'self'"><title>Grautam — Operações</title><link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css"><link rel="stylesheet" href="../../node_modules/bootstrap-icons/font/bootstrap-icons.min.css"><link rel="stylesheet" href="styles.css"></head>
-<body><div class="app-shell">
-  <aside class="sidebar glass-panel"><a class="brand" href="#"><img class="brand-mark-img" src="../../assets/grautam.ico" alt=""><span>grautam<small>SUA PRÓXIMA VIAGEM</small></span></a>
-    <div class="workspace-label">EXPLORAR</div>
-    <div class="nav-section">VIAGENS</div><button class="nav-link active" data-view="dashboard"><i class="bi bi-grid-1x2"></i>Descobrir voos</button><button class="nav-link" data-view="bookings"><i class="bi bi-airplane-engines"></i>Passagens <span class="nav-arrow bi bi-arrow-up-right"></span></button><button class="nav-link" data-view="schedule"><i class="bi bi-calendar3"></i>Minhas viagens</button><button class="nav-link" data-open="partners"><i class="bi bi-shield-check"></i>Parceiros de segurança</button>
-    <div class="nav-section mt-4">PREFERÊNCIAS</div><button class="nav-link" data-action="notifications"><i class="bi bi-bell"></i>Notificações <span class="status-dot"></span></button>
-    <div class="sidebar-bottom"><div class="support-card"><div class="support-icon"><i class="bi bi-headset"></i></div><div><b>Precisa de ajuda?</b><small>Fale com nossa equipe.</small></div><button data-open="support" title="Abrir suporte"><i class="bi bi-arrow-up-right"></i></button></div><button class="profile" data-open="account" aria-label="Abrir minha conta"><span class="profile-avatar" id="profileAvatar" aria-hidden="true">G</span><span class="profile-label"><b id="profileName">Minha conta</b><small id="profileSubtitle">Perfil de passageiro</small></span><i class="bi bi-chevron-right ms-auto"></i></button></div>
-  </aside>
-  <main class="main-area"><header class="topbar app-titlebar"><div class="titlebar-drag"><img src="../../assets/grautam.ico" alt=""><span>Grautam</span><span class="titlebar-separator">—</span><span class="titlebar-section">Descobrir voos</span></div><div class="window-controls"><button data-window="minimize" aria-label="Minimizar"><i class="bi bi-dash-lg"></i></button><button id="fullscreenButton" aria-label="Tela cheia"><i class="bi bi-fullscreen"></i></button><button data-window="close" aria-label="Fechar para bandeja" class="window-close"><i class="bi bi-x-lg"></i></button></div></header><header class="topbar"><div class="breadcrumb-text">Grautam <i class="bi bi-chevron-right"></i> <b>Descobrir voos</b></div><div class="topbar-actions"><span class="live-state"><span class="pulse"></span>Voos ao vivo</span><button class="icon-button" id="openNotifications" aria-label="Notificações"><i class="bi bi-bell"></i><span class="notification-count" id="notificationCount">0</span></button><span class="top-divider"></span><span class="today-date" id="todayDate"></span></div></header>
-    <div class="page-content"><div class="welcome-row"><div><div class="eyebrow"><span id="dateLabel"></span></div><h1>Descubra seu próximo destino<span class="greeting-dot">.</span></h1><p>Encontre voos, acompanhe o céu e planeje a viagem no seu ritmo.</p></div><button class="btn btn-grautam" data-open="bookings"><i class="bi bi-search"></i> Encontrar passagens</button></div>
-      <section class="country-monitor glass-panel"><div><div class="panel-kicker">SEU RADAR DE VIAGEM</div><b>Filtre por país de registro</b><small>A fonte ADS-B informa a origem de registro da aeronave, não sua posição no destino.</small></div><div id="countryChips" class="country-chips"></div></section>
-      <div class="alert alert-glass" id="updateBanner"><div class="update-icon"><i class="bi bi-arrow-repeat"></i></div><div class="flex-grow-1"><b>Bem-vindo ao Grautam</b><span>Seu espaço para acompanhar voos e organizar a próxima viagem.</span></div><span class="new-badge">TUDO PRONTO</span><button class="dismiss-button" aria-label="Dispensar aviso" data-dismiss="updates"><i class="bi bi-x-lg"></i></button></div>
-      <div class="metrics-grid"><article class="metric-card"><div class="metric-top"><span>Aeronaves monitoradas</span><span class="metric-icon indigo"><i class="bi bi-radar"></i></span></div><div class="metric-value" id="trackedCount">—</div><div class="metric-foot"><span class="trend neutral"><i class="bi bi-broadcast"></i> ADS-B</span><span>pelos países selecionados</span></div></article><article class="metric-card"><div class="metric-top"><span>Em voo</span><span class="metric-icon blue"><i class="bi bi-airplane"></i></span></div><div class="metric-value" id="airborneCount">—</div><div class="metric-foot"><span class="trend positive"><i class="bi bi-arrow-up-right"></i> ATIVOS</span><span>posição reportada</span></div></article><article class="metric-card"><div class="metric-top"><span>No solo</span><span class="metric-icon orange"><i class="bi bi-airplane-engines"></i></span></div><div class="metric-value" id="groundCount">—</div><div class="metric-foot"><span class="trend neutral"><i class="bi bi-clock"></i> ESTÁTICO</span><span>último sinal recebido</span></div></article><article class="metric-card"><div class="metric-top"><span>Voos cancelados</span><span class="metric-icon coral"><i class="bi bi-calendar-x"></i></span></div><div class="metric-value">—</div><div class="metric-foot"><span class="trend unavailable"><i class="bi bi-info-circle"></i> INDISPONÍVEL</span><span>fonte comercial necessária</span></div></article></div>
-      <section class="flight-panel glass-panel"><div class="panel-header"><div><div class="panel-kicker">MONITORAMENTO DE TRÁFEGO</div><h2>Aeronaves por país de registro</h2><p id="monitoringCountries">Países selecionados</p></div><div class="flight-tools"><div class="search-wrap"><i class="bi bi-search"></i><input id="flightSearch" placeholder="Buscar indicativo ou país..."></div><select id="flightFilter" aria-label="Filtrar voos"><option value="all">Todos os estados</option><option value="airborne">Em voo</option><option value="ground">No solo</option></select><button class="icon-button" id="refreshFlights" aria-label="Atualizar"><i class="bi bi-arrow-clockwise"></i></button></div></div>
-        <div class="source-note"><i class="bi bi-info-circle"></i> Dados ao vivo mostram posição e identificação ADS-B. Rotas comerciais, horários, cancelamentos e modelo podem não ser transmitidos pela aeronave.</div><div class="table-responsive"><table class="table flight-table"><thead><tr><th>INDICATIVO / HEX</th><th>PAÍS DE REGISTRO</th><th>ALTITUDE</th><th>VELOCIDADE</th><th>MODELO</th><th>ESTADO</th></tr></thead><tbody id="flightRows"><tr><td colspan="6" class="table-loading"><span class="spinner-border spinner-border-sm"></span> Conectando à rede ADS-B…</td></tr></tbody></table></div><div class="panel-footer"><span id="flightStatus">Conectando à fonte de dados…</span><span id="updatedAt">—</span></div></section>
-      <div class="bottom-grid"><section class="glass-panel demo-panel"><div class="section-title"><div><div class="panel-kicker">ACOMPANHAMENTO</div><h2>Voos em destaque</h2></div><span class="demo-chip">DEMONSTRAÇÃO</span></div><div class="demo-route"><div class="route-logo">G</div><div class="route-airline"><b>GT 8001 <span class="demo-state airborne-pill">Em voo</span></b><small>São Paulo (GRU) <i class="bi bi-arrow-right"></i> Santiago (SCL)</small><small>Aeronave comercial · cenário demonstrativo</small></div><div class="route-progress"><span>GRU</span><div><i></i></div><span>SCL</span><small>progresso ilustrativo</small></div></div><div class="demo-route"><div class="route-logo route-logo-blue">G</div><div class="route-airline"><b>GT 3420 <span class="demo-state boarding-pill">Previsto</span></b><small>Rio de Janeiro (GIG) <i class="bi bi-arrow-right"></i> Brasília (BSB)</small><small>Voo demonstrativo</small></div><div class="route-progress"><span>GIG</span><div class="progress-muted"></div><span>BSB</span><small>previsão ilustrativa</small></div></div><p class="demo-footnote"><i class="bi bi-info-circle"></i> Voos em destaque são demonstrações; o rastreamento ADS-B ao vivo está acima.</p></section><section class="glass-panel quick-panel"><div class="section-title"><div><div class="panel-kicker">ATALHOS</div><h2>Planeje com tranquilidade</h2></div></div><button class="quick-link" data-open="bookings"><span class="quick-icon"><i class="bi bi-ticket-perforated"></i></span><span><b>Simular uma passagem</b><small>Compare datas e formas de pagamento</small></span><i class="bi bi-arrow-up-right ms-auto"></i></button><button class="quick-link" data-view="schedule"><span class="quick-icon calendar-icon"><i class="bi bi-calendar-check"></i></span><span><b>Minhas viagens</b><small>Acesse seus planos salvos</small></span><i class="bi bi-arrow-up-right ms-auto"></i></button><button class="quick-link" data-open="partners"><span class="quick-icon"><i class="bi bi-shield-check"></i></span><span><b>Conheça os parceiros</b><small>Informações de segurança</small></span><i class="bi bi-arrow-up-right ms-auto"></i></button></section></div>
-      <footer class="app-footer"><span>© 2026 Grautam · Planeje sua próxima viagem</span><span>Fonte de tráfego: <b>OpenSky Network</b> · <span id="appVersion"></span></span></footer></div>
-  </main><div class="toast-container position-fixed top-0 end-0 p-3" id="toastHost"></div>
-  <div class="notification-popover glass-panel" id="notificationPopover"><div class="notification-head"><b>Notificações</b><button class="clear-notifications" id="clearNotifications">Limpar tudo</button><button class="icon-button" id="closeNotifications"><i class="bi bi-x-lg"></i></button></div><div id="notificationItems" class="notification-list"></div><div class="notification-preferences"><span>Avisos em tempo real</span><label class="switch"><input id="notificationToggle" type="checkbox" checked><span></span></label></div><div class="notification-foot" id="notificationFoot">Atualizando…</div></div>
-</div><script src="app.js"></script><script src="window-controls.js"></script></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
+  <title>Grautam — Vendas de Passagens Aéreas</title>
+  <link rel="stylesheet" href="../../node_modules/bootstrap-icons/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Frameless Window Titlebar (Claude Code Style) -->
+    <header class="app-titlebar">
+      <div class="titlebar-drag">
+        <img src="../../assets/grautam.ico" alt="Grautam Icon">
+        <span class="titlebar-brand">Grautam</span>
+        <span class="titlebar-badge">Comercial</span>
+        <span class="titlebar-divider">/</span>
+        <span class="titlebar-section" id="titlebarCurrentView">Buscar Passagens</span>
+      </div>
+      <div class="titlebar-controls">
+        <button class="titlebar-button" id="winMinimize" title="Minimizar">
+          <i class="bi bi-dash-lg"></i>
+        </button>
+        <button class="titlebar-button" id="winMaximize" title="Maximizar">
+          <i class="bi bi-square" id="winMaximizeIcon"></i>
+        </button>
+        <button class="titlebar-button window-close" id="winClose" title="Fechar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- App Body (Sidebar + Content Area) -->
+    <div class="app-container">
+      <!-- Sidebar Navigation -->
+      <aside class="app-sidebar">
+        <div class="brand-section">
+          <div class="brand-icon">
+            <i class="bi bi-airplane-fill"></i>
+          </div>
+          <div class="brand-info">
+            <span class="brand-name">Grautam</span>
+            <span class="brand-tag">Linhas Aéreas</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <div class="nav-group-title">Passagens & Voos</div>
+          <button class="nav-item active" data-tab="search">
+            <i class="bi bi-search"></i>
+            <span>Buscar Passagens</span>
+          </button>
+          <button class="nav-item" data-tab="bookings">
+            <i class="bi bi-ticket-perforated"></i>
+            <span>Minhas Reservas</span>
+            <span class="nav-pill" id="bookingsCountPill">1</span>
+          </button>
+          <button class="nav-item" data-tab="deals">
+            <i class="bi bi-stars"></i>
+            <span>Ofertas do Dia</span>
+            <span class="nav-pill">Promo</span>
+          </button>
+          <button class="nav-item" data-tab="tracker">
+            <i class="bi bi-radar"></i>
+            <span>Status de Voos</span>
+          </button>
+
+          <div class="nav-group-title">Atendimento</div>
+          <button class="nav-item" data-tab="support">
+            <i class="bi bi-headset"></i>
+            <span>Central de Ajuda</span>
+          </button>
+          <button class="nav-item" id="sidebarNotifBtn">
+            <i class="bi bi-bell"></i>
+            <span>Notificações</span>
+            <span class="nav-pill" id="sidebarNotifPill">0</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="passenger-profile">
+            <div class="profile-avatar">CS</div>
+            <div class="profile-meta">
+              <span class="profile-name" id="passengerDisplayName">Carlos Silveira</span>
+              <span class="profile-tier"><i class="bi bi-patch-check-fill"></i> Cliente Gold</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="app-main">
+        <!-- Topbar -->
+        <header class="app-topbar">
+          <div class="topbar-breadcrumb">
+            <span>Grautam</span>
+            <i class="bi bi-chevron-right" style="font-size: 10px;"></i>
+            <b id="breadcrumbCurrentView">Buscar Passagens</b>
+          </div>
+          <div class="topbar-actions">
+            <div class="live-indicator">
+              <span class="live-indicator-dot"></span>
+              <span>Emissão em Tempo Real</span>
+            </div>
+            <button class="topbar-icon-button" id="topbarNotifBtn" title="Notificações">
+              <i class="bi bi-bell"></i>
+              <span class="badge-counter" id="topbarNotifBadge" style="display: none;">0</span>
+            </button>
+            <span class="topbar-date" id="topbarLiveDate">--/--/----</span>
+          </div>
+        </header>
+
+        <!-- Dynamic Views -->
+        <div class="page-container">
+          
+          <!-- VIEW 1: BUSCAR PASSAGENS -->
+          <section class="view-section active" id="view-search">
+            <div class="page-hero">
+              <div class="page-eyebrow">Tarifas Aéreas em Tempo Real</div>
+              <h1 class="page-title">Descubra seu próximo destino.</h1>
+              <p class="page-description">Pesquise passagens aéreas nacionais e internacionais com tarifas exclusivas, parcelamento em até 12x e emissão instantânea.</p>
+            </div>
+
+            <!-- Search Card -->
+            <div class="search-box-card">
+              <div class="search-top-bar">
+                <div class="trip-type-selector">
+                  <button type="button" class="trip-type-btn active" data-triptype="round">Ida e Volta</button>
+                  <button type="button" class="trip-type-btn" data-triptype="oneway">Somente Ida</button>
+                </div>
+
+                <div class="search-meta-selectors">
+                  <div class="meta-select-wrap">
+                    <i class="bi bi-person"></i>
+                    <select id="searchPaxSelect">
+                      <option value="1">1 passageiro</option>
+                      <option value="2">2 passageiros</option>
+                      <option value="3">3 passageiros</option>
+                      <option value="4">4 passageiros</option>
+                      <option value="5">5 passageiros</option>
+                    </select>
+                  </div>
+                  <div class="meta-select-wrap">
+                    <i class="bi bi-shield-check"></i>
+                    <select id="searchCabinSelect">
+                      <option value="economy">Classe Econômica</option>
+                      <option value="premium">Premium Economy</option>
+                      <option value="business">Classe Executiva</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inputs Grid -->
+              <form id="flightSearchForm">
+                <div class="search-inputs-grid">
+                  <div class="input-field-group">
+                    <span class="input-label">Origem</span>
+                    <div class="input-box">
+                      <i class="bi bi-geo-alt"></i>
+                      <input list="airportsList" id="searchOriginInput" placeholder="Ex: São Paulo (GRU)" value="São Paulo (GRU)" required autocomplete="off">
+                    </div>
+                  </div>
+
+                  <button type="button" class="btn-swap-locations" id="btnSwapAirports" title="Inverter origem e destino">
+                    <i class="bi bi-arrow-left-right"></i>
+                  </button>
+
+                  <div class="input-field-group">
+                    <span class="input-label">Destino</span>
+                    <div class="input-box">
+                      <i class="bi bi-geo-alt-fill"></i>
+                      <input list="airportsList" id="searchDestinationInput" placeholder="Ex: Rio de Janeiro (GIG)" value="Rio de Janeiro (GIG)" required autocomplete="off">
+                    </div>
+                  </div>
+
+                  <div class="input-field-group">
+                    <span class="input-label">Data de Ida</span>
+                    <div class="input-box">
+                      <i class="bi bi-calendar3"></i>
+                      <input type="date" id="searchDateDep" required>
+                    </div>
+                  </div>
+
+                  <div class="input-field-group" id="dateReturnGroup">
+                    <span class="input-label">Data de Volta</span>
+                    <div class="input-box">
+                      <i class="bi bi-calendar-check"></i>
+                      <input type="date" id="searchDateRet">
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn-search-flights">
+                    <i class="bi bi-search"></i>
+                    <span>Buscar Voos</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Datalist for Airports -->
+            <datalist id="airportsList">
+              <option value="São Paulo (GRU)">Aeroporto Internacional de Guarulhos</option>
+              <option value="São Paulo (CGH)">Aeroporto de Congonhas</option>
+              <option value="Rio de Janeiro (GIG)">Aeroporto Internacional do Galeão</option>
+              <option value="Rio de Janeiro (SDU)">Aeroporto Santos Dumont</option>
+              <option value="Brasília (BSB)">Aeroporto Internacional de Brasília</option>
+              <option value="Salvador (SSA)">Aeroporto Internacional de Salvador</option>
+              <option value="Recife (REC)">Aeroporto Internacional do Recife</option>
+              <option value="Fortaleza (FOR)">Aeroporto Internacional de Fortaleza</option>
+              <option value="Porto Alegre (POA)">Aeroporto Internacional Salgado Filho</option>
+              <option value="Curitiba (CWB)">Aeroporto Internacional Afonso Pena</option>
+              <option value="Belo Horizonte (CNF)">Aeroporto Internacional de Confins</option>
+              <option value="Florianópolis (FLN)">Aeroporto Internacional Hercílio Luz</option>
+              <option value="Fernando de Noronha (FEN)">Aeroporto Gov. Carlos Wilson</option>
+              <option value="Santiago (SCL)">Aeroporto Internacional Arturo Merino Benítez</option>
+              <option value="Buenos Aires (EZE)">Aeroporto Internacional Ministro Pistarini</option>
+              <option value="Lisboa (LIS)">Aeroporto Humberto Delgado</option>
+              <option value="Madri (MAD)">Aeroporto Adolfo Suárez Madrid-Barajas</option>
+              <option value="Paris (CDG)">Aeroporto Paris-Charles de Gaulle</option>
+              <option value="Miami (MIA)">Miami International Airport</option>
+              <option value="Orlando (MCO)">Orlando International Airport</option>
+              <option value="Nova York (JFK)">John F. Kennedy International Airport</option>
+            </datalist>
+
+            <!-- Results Section -->
+            <div class="results-header-bar">
+              <div class="results-title-group">
+                <h3 id="resultsHeaderTitle">Voos Disponíveis</h3>
+                <span id="resultsHeaderSubtitle">Selecione o voo ideal para sua viagem</span>
+              </div>
+              <div class="results-filter-pills">
+                <button class="filter-pill-btn active" data-airlinefilter="all">Todas as Cias</button>
+                <button class="filter-pill-btn" data-airlinefilter="LATAM">LATAM</button>
+                <button class="filter-pill-btn" data-airlinefilter="GOL">GOL</button>
+                <button class="filter-pill-btn" data-airlinefilter="Azul">Azul</button>
+                <button class="filter-pill-btn" data-airlinefilter="TAP">TAP Air</button>
+                <button class="filter-pill-btn" id="filterDirectOnly">Apenas Diretos</button>
+              </div>
+            </div>
+
+            <!-- Flight Results List -->
+            <div class="flights-list" id="flightResultsList">
+              <!-- Dynamically populated -->
+            </div>
+          </section>
+
+          <!-- VIEW 2: MINHAS RESERVAS -->
+          <section class="view-section" id="view-bookings">
+            <div class="page-hero">
+              <div class="page-eyebrow">Gerenciamento de Viagens</div>
+              <h1 class="page-title">Minhas Reservas & Bilhetes</h1>
+              <p class="page-description">Consulte suas passagens aéreas emitidas, gere o Cartão de Embarque digital (Boarding Pass) e acompanhe o status da sua viagem.</p>
+            </div>
+
+            <div class="bookings-grid" id="myBookingsGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </section>
+
+          <!-- VIEW 3: OFERTAS DO DIA -->
+          <section class="view-section" id="view-deals">
+            <div class="page-hero">
+              <div class="page-eyebrow">Promoções Exclusivas</div>
+              <h1 class="page-title">Ofertas do Dia & Destinos em Alta</h1>
+              <p class="page-description">Aproveite descontos exclusivos de até 40% em passagens para os destinos mais cobiçados do Brasil e do exterior.</p>
+            </div>
+
+            <div class="deals-grid" id="dealsGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </section>
+
+          <!-- VIEW 4: STATUS DE VOOS -->
+          <section class="view-section" id="view-tracker">
+            <div class="page-hero">
+              <div class="page-eyebrow">Painel de Partidas e Chegadas</div>
+              <h1 class="page-title">Status de Voos Comerciais</h1>
+              <p class="page-description">Consulte informações atualizadas de partidas, chegadas, portões e terminais de embarque.</p>
+            </div>
+
+            <div class="tracker-search-bar">
+              <div class="tracker-input-wrap">
+                <i class="bi bi-search"></i>
+                <input type="text" id="trackerSearchInput" placeholder="Buscar por número do voo (ex: LA 3012, G3 1420) ou aeroporto...">
+              </div>
+            </div>
+
+            <div class="status-table-wrap">
+              <table class="status-table">
+                <thead>
+                  <tr>
+                    <th>Voo</th>
+                    <th>Companhia</th>
+                    <th>Rota</th>
+                    <th>Horário Previsto</th>
+                    <th>Terminal / Portão</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="statusTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- VIEW 5: CENTRAL DE AJUDA & SUPORTE -->
+          <section class="view-section" id="view-support">
+            <div class="page-hero">
+              <div class="page-eyebrow">Atendimento ao Cliente</div>
+              <h1 class="page-title">Central de Suporte & Informações</h1>
+              <p class="page-description">Dúvidas frequentes sobre franquia de bagagem, check-in, cancelamento ou fale diretamente com a equipe Grautam Viagens.</p>
+            </div>
+
+            <div class="support-layout">
+              <!-- FAQ Accordion -->
+              <div class="faq-list">
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Quais são as regras de bagagem de mão?</span>
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                  <div class="faq-answer">
+                    Pelas normas da ANAC, você tem direito a 1 bagagem de mão de até 10 kg com dimensões máximas de 55 x 35 x 25 cm, além de 1 item pessoal (mochila ou bolsa) que caiba sob o assento à frente.
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Como e quando posso fazer o check-in?</span>
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                  <div class="faq-answer">
+                    O check-in fica disponível a partir de 48 horas antes da partida do voo nacional (ou 24 horas para voos internacionais). Você pode emitir seu Cartão de Embarque na aba "Minhas Reservas".
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Posso cancelar ou remarcar minha passagem?</span>
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                  <div class="faq-answer">
+                    Sim. Conforme a Resolução 400 da ANAC, cancelamentos solicitados em até 24 horas após a compra com antecedência mínima de 7 dias para o voo contam com reembolso integral sem taxas.
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <button class="faq-question">
+                    <span>Quais documentos são exigidos no embarque?</span>
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                  <div class="faq-answer">
+                    Para voos nacionais: RG, CNH ou Passaporte original com foto. Para voos no Mercosul: RG com menos de 10 anos de emissão ou Passaporte. Para demais destinos internacionais: Passaporte válido e visto, se aplicável.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Support Form -->
+              <div class="support-contact-form">
+                <h3 style="font-family: var(--font-display); font-size: 16px; margin: 0 0 4px 0;">Fale com um Especialista</h3>
+                <p style="font-size: 11px; color: var(--text-secondary); margin: 0 0 10px 0;">Envie uma solicitação para a equipe de atendimento comercial da Grautam.</p>
+
+                <form id="supportTicketForm">
+                  <div class="form-group">
+                    <label>Seu E-mail</label>
+                    <input type="email" id="supportEmail" placeholder="seuemail@exemplo.com" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Assunto</label>
+                    <input type="text" id="supportSubject" placeholder="Ex: Dúvida sobre assentos ou bagagem" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Mensagem</label>
+                    <textarea id="supportMessage" rows="4" placeholder="Descreva sua solicitação com o máximo de detalhes..." required></textarea>
+                  </div>
+                  <button type="submit" class="btn-search-flights" style="width: 100%; margin-top: 6px;">
+                    <i class="bi bi-send"></i>
+                    <span>Enviar Chamado de Atendimento</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL -->
+  <div class="modal-backdrop" id="checkoutModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="checkoutModalTitle">Emissão de Passagem Aérea</h3>
+        <button type="button" class="modal-close-btn" id="closeCheckoutModal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Flight Selected Summary -->
+        <div id="checkoutFlightSummary" style="background-color: var(--bg-input); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+          <!-- Populated -->
+        </div>
+
+        <!-- Seat Map Selection -->
+        <div>
+          <span class="input-label" style="display: block; margin-bottom: 8px;">1. Escolha seu Assento na Aeronave</span>
+          <div class="seat-map-container">
+            <div class="seat-map-legend">
+              <div class="legend-item"><span class="seat-box selected" style="width: 18px; height: 18px;"></span><span>Selecionado</span></div>
+              <div class="legend-item"><span class="seat-box" style="width: 18px; height: 18px;"></span><span>Disponível</span></div>
+              <div class="legend-item"><span class="seat-box occupied" style="width: 18px; height: 18px;"></span><span>Ocupado</span></div>
+            </div>
+            <div class="seats-grid" id="seatMapGrid">
+              <!-- Dynamically populated seats -->
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 11px; margin-top: 10px; color: var(--claude-accent);">
+              Assento selecionado: <b id="selectedSeatLabel">12A</b> (Janela)
+            </div>
+          </div>
+        </div>
+
+        <!-- Passenger Info -->
+        <div>
+          <span class="input-label" style="display: block; margin-bottom: 8px;">2. Dados do Passageiro Titular</span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label>Nome Completo</label>
+              <input type="text" id="chkPaxName" value="Carlos Silveira" required>
+            </div>
+            <div class="form-group">
+              <label>CPF ou Passaporte</label>
+              <input type="text" id="chkPaxDoc" value="284.912.840-12" required>
+            </div>
+            <div class="form-group">
+              <label>E-mail para Receber Bilhete</label>
+              <input type="email" id="chkPaxEmail" value="carlos.silveira@grautam.com.br" required>
+            </div>
+            <div class="form-group">
+              <label>Telefone / WhatsApp</label>
+              <input type="text" id="chkPaxPhone" value="(11) 98765-4321" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extra Services -->
+        <div>
+          <span class="input-label" style="display: block; margin-bottom: 8px;">3. Serviços Adicionais Opcionais</span>
+          <div class="extras-options">
+            <label class="extra-option-card">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="extraBaggage">
+                <div class="extra-info">
+                  <b>Bagagem Despachada Adicional (23 kg)</b>
+                  <small>Despache sua mala no balcão sem pagar taxa de excesso no aeroporto</small>
+                </div>
+              </div>
+              <span class="extra-price">+ R$ 110,00</span>
+            </label>
+
+            <label class="extra-option-card">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="extraInsurance">
+                <div class="extra-info">
+                  <b>Seguro Viagem Proteção Total Grautam</b>
+                  <small>Cobertura médica de emergência, extravio de bagagem e cancelamento</small>
+                </div>
+              </div>
+              <span class="extra-price">+ R$ 49,90</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Payment Selection -->
+        <div>
+          <span class="input-label" style="display: block; margin-bottom: 8px;">4. Forma de Pagamento</span>
+          <div class="payment-methods-tabs">
+            <button type="button" class="payment-tab-btn active" data-payment="PIX">
+              <i class="bi bi-qr-code" style="font-size: 16px;"></i>
+              <span>PIX (5% OFF)</span>
+            </button>
+            <button type="button" class="payment-tab-btn" data-payment="Cartão de Crédito">
+              <i class="bi bi-credit-card" style="font-size: 16px;"></i>
+              <span>Cartão de Crédito</span>
+            </button>
+            <button type="button" class="payment-tab-btn" data-payment="Boleto">
+              <i class="bi bi-upc" style="font-size: 16px;"></i>
+              <span>Boleto Bancário</span>
+            </button>
+          </div>
+
+          <!-- Payment Details Box -->
+          <div id="paymentDetailsContainer" style="margin-top: 12px;">
+            <!-- PIX Box -->
+            <div class="pix-qr-box" id="pixPaymentBox">
+              <div class="pix-qr-visual">
+                <!-- SVG Mock QR Code -->
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                  <rect width="100" height="100" fill="#ffffff"/>
+                  <rect x="10" y="10" width="25" height="25" fill="#181816"/>
+                  <rect x="15" y="15" width="15" height="15" fill="#ffffff"/>
+                  <rect x="18" y="18" width="9" height="9" fill="#d97736"/>
+                  <rect x="65" y="10" width="25" height="25" fill="#181816"/>
+                  <rect x="70" y="15" width="15" height="15" fill="#ffffff"/>
+                  <rect x="73" y="18" width="9" height="9" fill="#d97736"/>
+                  <rect x="10" y="65" width="25" height="25" fill="#181816"/>
+                  <rect x="15" y="70" width="15" height="15" fill="#ffffff"/>
+                  <rect x="18" y="73" width="9" height="9" fill="#d97736"/>
+                  <rect x="45" y="15" width="10" height="10" fill="#181816"/>
+                  <rect x="45" y="45" width="12" height="12" fill="#d97736"/>
+                  <rect x="65" y="65" width="20" height="20" fill="#181816"/>
+                </svg>
+              </div>
+              <div style="text-align: center;">
+                <b style="font-size: 12px; color: var(--status-emerald);">Pagamento Instantâneo via PIX com 5% de Desconto</b>
+                <p style="font-size: 11px; color: var(--text-secondary); margin: 4px 0 8px 0;">Aponte o app do seu banco ou copie a chave PIX abaixo:</p>
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" readonly value="pix.grautam.com.br/checkout/ticket-84920" style="background: var(--bg-surface); border: 1px solid var(--border-medium); border-radius: 6px; padding: 6px 10px; font-family: var(--font-mono); font-size: 10px; width: 240px; color: var(--text-muted);">
+                  <button type="button" class="btn-select-flight" style="padding: 6px 12px; font-size: 10px;" id="btnCopyPix">Copiar Chave</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Box (hidden initially) -->
+            <div id="cardPaymentBox" style="display: none; background: var(--bg-input); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group" style="grid-column: 1 / 3;">
+                  <label>Número do Cartão de Crédito</label>
+                  <input type="text" placeholder="•••• •••• •••• 4289" value="•••• •••• •••• 4289">
+                </div>
+                <div class="form-group">
+                  <label>Validade</label>
+                  <input type="text" placeholder="MM/AA" value="08/29">
+                </div>
+                <div class="form-group">
+                  <label>CVV</label>
+                  <input type="password" placeholder="•••" value="842">
+                </div>
+                <div class="form-group" style="grid-column: 1 / 3;">
+                  <label>Opções de Parcelamento</label>
+                  <select id="cardInstallmentsSelect" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 8px; color: var(--text-primary); font-family: var(--font-mono); font-size: 11px;">
+                    <option value="1">1x à vista sem juros</option>
+                    <option value="3">3x sem juros</option>
+                    <option value="6">6x sem juros</option>
+                    <option value="10">10x sem juros</option>
+                    <option value="12">12x sem juros</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Boleto Box (hidden initially) -->
+            <div id="boletoPaymentBox" style="display: none; background: var(--bg-input); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); text-align: center;">
+              <i class="bi bi-upc-scan" style="font-size: 28px; color: var(--claude-accent);"></i>
+              <b style="display: block; margin-top: 6px; font-size: 12px;">Boleto Bancário Registrado</b>
+              <p style="font-size: 11px; color: var(--text-secondary); margin: 4px 0 0;">Linha digitável emitida após a confirmação. Compensação em até 1 dia útil.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="total-summary">
+          <small>VALOR TOTAL FINAL</small>
+          <b id="checkoutFinalTotal">R$ 349,00</b>
+        </div>
+        <button type="button" class="btn-confirm-checkout" id="btnConfirmEmission">
+          <i class="bi bi-check2-circle"></i>
+          <span>Emitir Bilhete Eletrônico</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARDING PASS MODAL -->
+  <div class="modal-backdrop" id="boardingPassModal">
+    <div class="modal-box" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3>Cartão de Embarque Digital (Boarding Pass)</h3>
+        <button type="button" class="modal-close-btn" id="closeBoardingPassModal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px;">
+        <div class="boarding-pass-ticket" id="printableTicket">
+          <div class="ticket-header-strip">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="bi bi-airplane-fill" style="color: var(--claude-accent);"></i>
+              <span class="pass-brand" id="passAirlineName">LATAM Airlines</span>
+            </div>
+            <div style="text-align: right;">
+              <small style="font-family: var(--font-mono); font-size: 8px; color: var(--text-muted); display: block;">LOCALIZADOR (PNR)</small>
+              <span class="pass-pnr" id="passPnr">GTM-78241</span>
+            </div>
+          </div>
+
+          <div class="ticket-main-strip">
+            <div class="ticket-flight-hero">
+              <div class="ticket-hero-point">
+                <h2 id="passOriginCode">GRU</h2>
+                <span id="passOriginCity">São Paulo</span>
+              </div>
+
+              <div class="ticket-middle-airplane">
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);" id="passDuration">1h 10m</span>
+                <i class="bi bi-airplane"></i>
+                <span class="stops-badge" id="passStopsBadge">Direto</span>
+              </div>
+
+              <div class="ticket-hero-point" style="text-align: right;">
+                <h2 id="passDestCode">GIG</h2>
+                <span id="passDestCity">Rio de Janeiro</span>
+              </div>
+            </div>
+
+            <div class="ticket-data-grid">
+              <div class="ticket-data-cell">
+                <label>PASSAGEIRO</label>
+                <span id="passPaxName">Carlos Silveira</span>
+              </div>
+              <div class="ticket-data-cell">
+                <label>VOO</label>
+                <span id="passFlightNo">LA 3012</span>
+              </div>
+              <div class="ticket-data-cell">
+                <label>DATA</label>
+                <span id="passDate">15/11/2026</span>
+              </div>
+              <div class="ticket-data-cell">
+                <label>HORÁRIO</label>
+                <span id="passTime">06:15</span>
+              </div>
+              <div class="ticket-data-cell">
+                <label>TERMINAL</label>
+                <span id="passTerminal">T3</span>
+              </div>
+              <div class="ticket-data-cell">
+                <label>PORTÃO</label>
+                <span id="passGate">B12</span>
+              </div>
+              <div class="ticket-data-cell">
+                <label>ASSENTO</label>
+                <span id="passSeat" style="color: var(--claude-accent);">12A</span>
+              </div>
+              <div class="ticket-data-cell">
+                <label>CLASSE</label>
+                <span id="passClass">Econômica</span>
+              </div>
+            </div>
+
+            <div class="ticket-barcode-strip">
+              <div class="mock-barcode">
+                <span class="mock-bar" style="width: 2px;"></span>
+                <span class="mock-bar" style="width: 4px;"></span>
+                <span class="mock-bar" style="width: 1px;"></span>
+                <span class="mock-bar" style="width: 3px;"></span>
+                <span class="mock-bar" style="width: 5px;"></span>
+                <span class="mock-bar" style="width: 2px;"></span>
+                <span class="mock-bar" style="width: 1px;"></span>
+                <span class="mock-bar" style="width: 4px;"></span>
+                <span class="mock-bar" style="width: 2px;"></span>
+                <span class="mock-bar" style="width: 3px;"></span>
+                <span class="mock-bar" style="width: 5px;"></span>
+                <span class="mock-bar" style="width: 2px;"></span>
+                <span class="mock-bar" style="width: 1px;"></span>
+                <span class="mock-bar" style="width: 4px;"></span>
+                <span class="mock-bar" style="width: 3px;"></span>
+              </div>
+              <div style="text-align: right;">
+                <small style="font-family: var(--font-mono); font-size: 8px; color: var(--text-muted); display: block;">BILHETE ELETRÔNICO</small>
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary);" id="passEticket">042-89210948</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-select-flight" style="background: var(--bg-surface); border: 1px solid var(--border-medium); color: var(--text-primary); width: auto;" id="btnPrintTicket">
+          <i class="bi bi-printer"></i> Imprimir Bilhete
+        </button>
+        <button type="button" class="btn-confirm-checkout" id="btnClosePass">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS POPOVER -->
+  <div class="notification-popover" id="notifPopover">
+    <div class="notif-header">
+      <span>Notificações</span>
+      <button type="button" class="notif-clear-btn" id="btnClearNotifs">Limpar</button>
+    </div>
+    <div class="notif-body" id="notifListContainer">
+      <!-- Populated -->
+    </div>
+  </div>
+
+  <!-- TOAST HOST -->
+  <div class="toast-host" id="toastHost"></div>
+
+  <script src="window-controls.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

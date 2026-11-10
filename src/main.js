@@ -1,198 +1,345 @@
-const { app, BrowserWindow, ipcMain, nativeTheme, Notification, Tray, Menu, shell, dialog, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeTheme, Notification, Tray, Menu, shell, dialog } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
-const { spawnSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
-if (!app.isPackaged) app.setPath('userData', path.join(__dirname, '..', '.dev-user-data'));
+
+if (!app.isPackaged) {
+  app.setPath('userData', path.join(__dirname, '..', '.dev-user-data'));
+}
+
 const data = require('./services/store');
-const opensky = require('./services/opensky');
+const flights = require('./services/flights');
 
 let mainWindow;
 let tray;
 let quitting = false;
 let lastNotice = '';
-const fullscreenBounds = new WeakMap();
-const navigationTimers = new WeakMap();
+
 const iconPath = app.isPackaged
   ? path.join(process.resourcesPath, 'assets', 'grautam.ico')
   : path.join(__dirname, '..', 'assets', 'grautam.ico');
-const dev = !app.isPackaged;
 
-function isValidDepartureDate(value) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
-  const today = new Date();
-  return date.getTime() >= Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-}
-
-function windows() { return BrowserWindow.getAllWindows().filter(w => !w.isDestroyed()); }
-function createWindow({ page = 'index.html', width = 1440, height = 960, minWidth = 1100, minHeight = 740, title = 'Grautam' } = {}) {
-  const { width: workWidth, height: workHeight } = screen.getPrimaryDisplay().workAreaSize;
-  width = Math.min(width, workWidth); height = Math.min(height, workHeight);
-  minWidth = Math.min(minWidth, width); minHeight = Math.min(minHeight, height);
-  const win = new BrowserWindow({ width, height, minWidth, minHeight, resizable: false, maximizable: false, fullscreenable: true, center: true, frame: false, show: false, title, icon: iconPath,
-    backgroundColor: '#000000', autoHideMenuBar: true,
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true }
-  });
-  win.setMenu(null);
-  win.once('ready-to-show', () => win.show());
-  win.on('enter-full-screen', () => win.webContents.send('window:fullscreen', true));
-  win.on('leave-full-screen', () => {
-    const bounds = fullscreenBounds.get(win);
-    if (bounds && !win.isDestroyed()) win.setBounds(bounds);
-    fullscreenBounds.delete(win);
-    win.webContents.send('window:fullscreen', false);
-  });
-  win.on('close', event => { if (!quitting) { event.preventDefault(); win.hide(); if (mainWindow === win) showNotice('Grautam continua em execução na bandeja.'); } });
-  win.webContents.setWindowOpenHandler(({ url }) => { if (url.startsWith('mailto:')) shell.openExternal(url); return { action: 'deny' }; });
-  if (dev) win.loadFile(path.join(__dirname, 'renderer', page));
-  else win.loadFile(path.join(__dirname, 'renderer', page));
-  win.webContents.on('will-navigate', (event, url) => {
-    event.preventDefault();
-    if (url.startsWith('mailto:')) shell.openExternal(url).catch(error => console.error('Falha ao abrir cliente de e-mail:', error));
-  });
-  return win;
-}
-function showNotice(body, title = 'Grautam', force = false) {
+function showNotice(body, title = 'Grautam Viagens') {
   const settings = data.getSettings();
-  if ((!settings.notifications && !force) || !Notification.isSupported()) return;
+  if (!settings.notifications || !Notification.isSupported()) return;
   const key = `${title}:${body}`;
   if (key === lastNotice) return;
   lastNotice = key;
-  const notice = new Notification({ title, body, icon: iconPath, silent: true });
-  notice.on('click', () => { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } });
-  notice.show(); setTimeout(() => { if (lastNotice === key) lastNotice = ''; }, 6000);
-}
-function installTray() {
-  tray = new Tray(iconPath);
-  tray.setToolTip('Grautam — viagens aéreas');
-  tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Abrir Grautam', click: () => { mainWindow.show(); mainWindow.focus(); } },
-    { label: 'Central de suporte', click: () => navigateWindow(mainWindow, 'support') },
-    { type: 'separator' },
-    { label: 'Sair do Grautam', click: () => { quitting = true; app.quit(); } }
-  ]));
-  tray.on('double-click', () => { mainWindow.show(); mainWindow.focus(); });
-  tray.on('click', () => { mainWindow.show(); mainWindow.focus(); });
-}
-function navigateWindow(win, name) {
-  const routes = {
-    dashboard: { page: 'index.html', title: 'Grautam — Visão geral' },
-    bookings: { page: 'bookings.html', title: 'Grautam — Passagens' },
-    schedule: { page: 'bookings.html', title: 'Grautam — Minhas viagens', hash: 'savedTrips' },
-    account: { page: 'account.html', title: 'Grautam — Minha conta' },
-    partners: { page: 'partners.html', title: 'Grautam — Segurança' },
-    support: { page: 'support.html', title: 'Grautam — Suporte' }
-  };
-  const route = routes[name];
-  if (!route || !win || win.isDestroyed()) return false;
-  win.setTitle(route.title);
-  const options = route.hash ? { hash: route.hash } : undefined;
-  const previousTimer = navigationTimers.get(win);
-  if (previousTimer) clearTimeout(previousTimer);
-  win.webContents.executeJavaScript('document.body.classList.add("is-navigating")').catch(() => {});
-  const timer = setTimeout(() => {
-    navigationTimers.delete(win);
-    if (!win.isDestroyed()) win.loadFile(path.join(__dirname, 'renderer', route.page), options);
-  }, 110);
-  navigationTimers.set(win, timer);
-  win.show(); win.focus();
-  return true;
+  const notice = new Notification({ title, body, icon: iconPath, silent: false });
+  notice.on('click', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+  notice.show();
+  setTimeout(() => { if (lastNotice === key) lastNotice = ''; }, 6000);
 }
 
-const allowedChannels = new Set(['flights:live', 'trips:list', 'trips:save', 'trips:delete', 'settings:get', 'settings:set', 'notifications:list', 'notifications:clear', 'notice:create', 'booking:simulate', 'window:open', 'window:toggle-fullscreen', 'window:minimize', 'window:close', 'app:version', 'support:send', 'updates:check', 'notice:dismiss', 'profile:get', 'profile:save', 'profile:clear']);
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 1320,
+    height: 860,
+    minWidth: 1040,
+    minHeight: 680,
+    resizable: true,
+    maximizable: true,
+    fullscreenable: true,
+    center: true,
+    frame: false,
+    show: false,
+    title: 'Grautam — Vendas de Passagens Aéreas',
+    icon: iconPath,
+    backgroundColor: '#181816',
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      webSecurity: true
+    }
+  });
+
+  win.setMenu(null);
+
+  win.once('ready-to-show', () => {
+    win.show();
+  });
+
+  win.on('maximize', () => {
+    win.webContents.send('window:maximized-change', true);
+  });
+
+  win.on('unmaximize', () => {
+    win.webContents.send('window:maximized-change', false);
+  });
+
+  win.on('enter-full-screen', () => {
+    win.webContents.send('window:fullscreen', true);
+  });
+
+  win.on('leave-full-screen', () => {
+    win.webContents.send('window:fullscreen', false);
+  });
+
+  win.on('close', event => {
+    if (!quitting) {
+      event.preventDefault();
+      win.hide();
+      showNotice('Grautam continua rodando na bandeja do sistema.');
+    }
+  });
+
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('mailto:') || url.startsWith('https://')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+
+  win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  return win;
+}
+
+function installTray() {
+  if (tray) return;
+  tray = new Tray(iconPath);
+  tray.setToolTip('Grautam — Passagens e Viagens');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    {
+      label: 'Abrir Grautam Viagens',
+      click: () => {
+        if (mainWindow) {
+          if (mainWindow.isMinimized()) mainWindow.restore();
+          mainWindow.show();
+          mainWindow.focus();
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Encerrar Grautam',
+      click: () => {
+        quitting = true;
+        app.quit();
+      }
+    }
+  ]));
+
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+
+  tray.on('click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
+
+const ALLOWED_CHANNELS = new Set([
+  'flights:search',
+  'flights:deals',
+  'flights:status',
+  'flights:airports',
+  'bookings:list',
+  'bookings:create',
+  'bookings:cancel',
+  'trips:list',
+  'trips:save',
+  'trips:delete',
+  'settings:get',
+  'settings:set',
+  'notifications:list',
+  'notifications:clear',
+  'notice:create',
+  'window:minimize',
+  'window:maximize',
+  'window:toggle-maximize',
+  'window:is-maximized',
+  'window:toggle-fullscreen',
+  'window:close',
+  'app:version',
+  'support:send'
+]);
+
 ipcMain.handle('app:request', async (event, channel, payload) => {
-  if (!allowedChannels.has(channel) || !windows().some(w => w.webContents.id === event.sender.id)) throw new Error('Solicitação não autorizada.');
+  if (!ALLOWED_CHANNELS.has(channel)) {
+    throw new Error('Solicitação não autorizada.');
+  }
+
+  const senderWin = BrowserWindow.fromWebContents(event.sender);
+
   switch (channel) {
-    case 'flights:live': return opensky.getStates(payload?.bounds || {});
-    case 'trips:list': return data.listTrips();
-    case 'trips:save': {
-      const trip = data.saveTrip(payload);
-      showNotice(`Planejamento ${trip.origin} → ${trip.destination} salvo na sua agenda.`, 'Viagem salva');
-      return trip;
-    }
-    case 'trips:delete': return data.deleteTrip(payload?.id);
-    case 'settings:get': return data.getSettings();
-    case 'settings:set': return data.setSettings(payload);
-    case 'profile:get': return data.getProfile();
-    case 'profile:save': return data.saveProfile(payload);
-    case 'profile:clear': data.clearProfile(); return true;
-    case 'notifications:list': return data.listNotifications();
-    case 'notifications:clear': data.clearNotifications(); return true;
-    case 'notice:create': {
-      const notice = data.addNotification(payload);
-      showNotice(notice.message, notice.title);
-      return notice;
-    }
-    case 'booking:simulate': {
-      const rawTrip = payload || {};
-      const trip = {
-        id: `booking_${randomUUID()}`,
-        origin: String(rawTrip.origin || '').trim().slice(0, 80),
-        destination: String(rawTrip.destination || '').trim().slice(0, 80),
-        date: String(rawTrip.date || '').slice(0, 10),
-        passengers: Number(rawTrip.passengers),
-        createdAt: Date.now()
-      };
-      if (!trip.origin || !trip.destination || trip.origin === trip.destination || !isValidDepartureDate(trip.date) || !Number.isInteger(trip.passengers) || trip.passengers < 1 || trip.passengers > 9) throw new Error('Revise origem, destino, data futura válida e número de passageiros.');
-      const payment = ['PIX', 'Cartão', 'Boleto'].includes(payload?.payment) ? payload.payment : 'PIX';
-      const airlines = ['LATAM', 'Azul', 'GOL', 'Avianca', 'Copa Airlines', 'Iberia', 'Air France', 'Lufthansa'];
-      const airline = airlines.includes(payload?.airline) ? payload.airline : 'LATAM';
-      const total = Number(payload?.total);
-      if (!Number.isFinite(total) || total < 50 || total > 100000) throw new Error('Valor estimado inválido.');
-      const booking = { id: randomUUID(), ...trip, payment, airline, total: Math.round(total * 100) / 100, status: 'simulated', createdAt: Date.now() };
-      data.store.set('bookings', [booking, ...data.store.get('bookings', [])].slice(0, 100));
-      const notice = data.addNotification({ type: 'purchase', title: 'Compra simulada', message: `${airline}: viagem ${trip.origin} → ${trip.destination} · ${payment} · ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(booking.total)}` });
-      showNotice(notice.message, notice.title);
+    case 'flights:search':
+      return flights.searchFlights(payload || {});
+
+    case 'flights:deals':
+      return flights.getDeals();
+
+    case 'flights:status':
+      return flights.getFlightStatus(payload?.query);
+
+    case 'flights:airports':
+      return flights.getAirports();
+
+    case 'bookings:list':
+      return data.listBookings();
+
+    case 'bookings:create': {
+      const booking = data.saveBooking(payload);
+      data.addNotification({
+        type: 'purchase',
+        title: 'Bilhete Aéreo Emitido',
+        message: `${booking.airline} (${booking.flightNumber}) · ${booking.originCode} → ${booking.destinationCode} · Localizador: ${booking.pnr}`
+      });
+      showNotice(
+        `Localizador ${booking.pnr} · Voo ${booking.flightNumber} (${booking.originCode} → ${booking.destinationCode}) emitido com sucesso!`,
+        'Passagem Confirmada'
+      );
       return booking;
     }
-    case 'window:open': return navigateWindow(BrowserWindow.fromWebContents(event.sender), payload?.name);
-    case 'window:toggle-fullscreen': { const win = BrowserWindow.fromWebContents(event.sender); if (!win) return false; const next = !win.isFullScreen(); if (next) fullscreenBounds.set(win, win.getBounds()); win.setFullScreen(next); return next; }
-    case 'window:minimize': BrowserWindow.fromWebContents(event.sender)?.minimize(); return true;
-    case 'window:close': BrowserWindow.fromWebContents(event.sender)?.hide(); return true;
-    case 'app:version': return app.getVersion();
-    case 'updates:check': return { status: 'manual', message: 'Para atualizações, instale a versão mais recente distribuída pela sua empresa.' };
-    case 'support:send': {
-      const input = payload || {};
-      const clean = value => String(value || '').replace(/[\r\n]+/g, ' ').trim().slice(0, 300);
-      const email = clean(input.email), subject = clean(input.subject), message = String(input.message || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').slice(0, 5000);
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !subject || !message.trim()) throw new Error('Preencha e-mail, assunto e mensagem.');
-      data.store.set('supportDrafts', [{ id: randomUUID(), email, subject, message: message.trim(), createdAt: Date.now() }, ...data.store.get('supportDrafts', [])].slice(0, 100));
-      const query = new URLSearchParams({ subject: `[Grautam] ${subject}`, body: `${message.trim()}\n\nContato: ${email}` });
-      await shell.openExternal(`mailto:suporte@grautam.com?${query.toString()}`);
-      showNotice('Rascunho registrado. Conclua o envio no seu aplicativo de e-mail.', 'Suporte');
-      return { saved: true };
+
+    case 'bookings:cancel': {
+      const canceled = data.cancelBooking(payload?.id);
+      data.addNotification({
+        type: 'flight',
+        title: 'Reserva Cancelada',
+        message: `Localizador ${canceled.pnr} cancelado. Estorno processado.`
+      });
+      showNotice(`A reserva ${canceled.pnr} foi cancelada com sucesso.`, 'Cancelamento de Reserva');
+      return canceled;
     }
-    case 'notice:dismiss': data.store.set('dismissed', [...new Set([...data.store.get('dismissed', []), String(payload?.id || '').slice(0, 120)])].slice(-200)); return true;
+
+    case 'trips:list':
+      return data.listTrips();
+
+    case 'trips:save': {
+      const trip = data.saveTrip(payload);
+      data.addNotification({
+        type: 'system',
+        title: 'Viagem Salva na Agenda',
+        message: `${trip.origin} → ${trip.destination} (${trip.date})`
+      });
+      return trip;
+    }
+
+    case 'trips:delete':
+      data.deleteTrip(payload?.id);
+      return true;
+
+    case 'settings:get':
+      return data.getSettings();
+
+    case 'settings:set':
+      return data.setSettings(payload);
+
+    case 'notifications:list':
+      return data.listNotifications();
+
+    case 'notifications:clear':
+      data.clearNotifications();
+      return true;
+
+    case 'notice:create':
+      return data.addNotification(payload);
+
+    case 'window:minimize':
+      senderWin?.minimize();
+      return true;
+
+    case 'window:maximize':
+      senderWin?.maximize();
+      return true;
+
+    case 'window:toggle-maximize': {
+      if (!senderWin) return false;
+      if (senderWin.isMaximized()) {
+        senderWin.unmaximize();
+        return false;
+      } else {
+        senderWin.maximize();
+        return true;
+      }
+    }
+
+    case 'window:is-maximized':
+      return senderWin?.isMaximized() || false;
+
+    case 'window:toggle-fullscreen': {
+      if (!senderWin) return false;
+      const next = !senderWin.isFullScreen();
+      senderWin.setFullScreen(next);
+      return next;
+    }
+
+    case 'window:close':
+      senderWin?.hide();
+      return true;
+
+    case 'app:version':
+      return app.getVersion();
+
+    case 'support:send': {
+      const email = String(payload?.email || '').trim();
+      const subject = String(payload?.subject || '').trim();
+      const message = String(payload?.message || '').trim();
+      if (!email || !subject || !message) {
+        throw new Error('Preencha e-mail, assunto e a mensagem.');
+      }
+      data.addNotification({
+        type: 'system',
+        title: 'Chamado de Suporte Registrado',
+        message: `Assunto: ${subject}`
+      });
+      const query = new URLSearchParams({
+        subject: `[Grautam Viagens] ${subject}`,
+        body: `${message}\n\nContato: ${email}`
+      });
+      await shell.openExternal(`mailto:suporte@grautam.com?${query.toString()}`);
+      showNotice('Chamado registrado. Seu e-mail foi aberto para envio.', 'Central de Atendimento');
+      return { success: true };
+    }
+
+    default:
+      throw new Error(`Canal não suportado: ${channel}`);
   }
 });
 
-function setupFirstRun() {
-  const complete = path.join(app.getPath('userData'), 'setup-v1.json');
-  if (fs.existsSync(complete)) return;
-  const nodeModules = path.join(__dirname, '..', 'node_modules');
-  if (!fs.existsSync(path.join(nodeModules, 'bootstrap', 'dist', 'css', 'bootstrap.min.css'))) {
-    const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['install', '--no-audit', '--no-fund'], { cwd: path.join(__dirname, '..'), stdio: 'inherit', timeout: 10 * 60 * 1000, windowsHide: true });
-    if (result.error || result.status !== 0) { dialog.showErrorBox('Configuração do Grautam', 'Não foi possível instalar as dependências. Confirme a conexão e tente abrir o aplicativo novamente.'); throw result.error || new Error('npm install falhou'); }
+app.whenReady().then(() => {
+  const lock = app.requestSingleInstanceLock();
+  if (!lock) {
+    app.quit();
+    return;
   }
-  fs.mkdirSync(app.getPath('userData'), { recursive: true });
-  fs.writeFileSync(complete, JSON.stringify({ version: 1, completedAt: new Date().toISOString() }), { flag: 'w' });
-}
 
-const singleInstanceLock = app.requestSingleInstanceLock();
-if (!singleInstanceLock) {
-  app.quit();
-} else {
-  app.on('second-instance', () => { mainWindow?.show(); mainWindow?.focus(); });
-  app.whenReady().then(() => {
-  try { setupFirstRun(); } catch (error) { dialog.showErrorBox('Grautam', error.message); app.quit(); return; }
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+
   mainWindow = createWindow();
   installTray();
   nativeTheme.themeSource = 'dark';
-  app.on('activate', () => { if (mainWindow.isVisible()) mainWindow.focus(); else mainWindow.show(); });
+
+  app.on('activate', () => {
+    if (mainWindow.isVisible()) {
+      mainWindow.focus();
+    } else {
+      mainWindow.show();
+    }
+  });
 });
-app.on('before-quit', () => { quitting = true; });
-app.on('window-all-closed', () => { /* A bandeja mantém o processo ativo. */ });
-}
+
+app.on('before-quit', () => {
+  quitting = true;
+});
