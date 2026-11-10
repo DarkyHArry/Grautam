@@ -24,3 +24,4 @@ Todas as alterações notáveis deste projeto estão documentadas neste arquivo.
 - Pasta e ícones não relacionados de segurança policial.
 - Telas legadas desconectadas (`partners.html`, `bookings.html`, `support.html`).
 - Módulo OpenSky ADS-B de rastreamento militar/não comercial da tela inicial.
+

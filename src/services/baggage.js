@@ -47,3 +47,4 @@ module.exports = {
   BAGGAGE_RULES,
   calculateBaggageFee
 };
+

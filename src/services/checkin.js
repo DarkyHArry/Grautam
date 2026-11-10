@@ -55,3 +55,4 @@ module.exports = {
   processOnlineCheckIn,
   calculateBoardingTime
 };
+

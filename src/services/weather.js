@@ -29,3 +29,4 @@ function getDestinationWeather(airportCode) {
 module.exports = {
   getDestinationWeather
 };
+

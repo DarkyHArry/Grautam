@@ -34,3 +34,4 @@ function generateOperationalAlerts(booking) {
 module.exports = {
   generateOperationalAlerts
 };
+

@@ -38,3 +38,4 @@ assert.strictEqual(searchResults[0].pixPrice, Math.round(searchResults[0].totalP
 console.log('✓ Teste de Desconto no PIX (5%): PASSOU');
 
 console.log('\nTodos os testes de flights.test.js passaram com sucesso!\n');
+

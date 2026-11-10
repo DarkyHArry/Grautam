@@ -63,3 +63,4 @@ A interface adota a estética minimalista e acolhedora do Claude Code:
 | `window:minimize` | — | Minimiza a janela para a barra de tarefas |
 | `window:toggle-maximize` | — | Alterna entre maximizado e tamanho restaurado |
 | `window:close` | — | Oculta janela para a bandeja do sistema |
+

@@ -42,3 +42,4 @@ assert(ics.includes('END:VCALENDAR'), 'Arquivo deve conter encerramento do calen
 console.log('✓ Teste de Exportação iCalendar (.ics): PASSOU');
 
 console.log('\nTodos os testes de store.test.js passaram com sucesso!\n');
+

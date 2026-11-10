@@ -42,3 +42,4 @@ module.exports = {
   SEAT_CATEGORIES,
   getSeatDetails
 };
+

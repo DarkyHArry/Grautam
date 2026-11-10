@@ -1,0 +1,5 @@
+# Normalização de Quebra de Linha
+* text=auto eol=lf
+*.ico binary
+*.png binary
+*.jpg binary

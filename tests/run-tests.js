@@ -20,3 +20,4 @@ for (const file of testFiles) {
 }
 
 console.log(`=== TODOS OS ${passed} ARQUIVOS DE TESTE EXECUTADOS COM SUCESSO! ===`);
+

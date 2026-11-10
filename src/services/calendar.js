@@ -37,3 +37,4 @@ function generateIcsCalendar(booking) {
 module.exports = {
   generateIcsCalendar
 };
+

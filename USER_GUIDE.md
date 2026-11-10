@@ -44,3 +44,4 @@ Manual de utilização do sistema de pesquisa, reserva e emissão de passagens a
 
 - Na aba **Ofertas do Dia**, explore tarifas com até 40% de desconto e clique em **Pesquisar Voo** para preencher automaticamente os dados da rota.
 - Na aba **Grautam Miles**, acompanhe seu saldo acumulado de pontos, confira sua categoria (Gold/Platinum) e os benefícios exclusivos de franquia de bagagem e embarque prioritário.
+

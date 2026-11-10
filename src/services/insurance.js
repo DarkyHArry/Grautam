@@ -52,3 +52,4 @@ module.exports = {
   INSURANCE_PLANS,
   issueInsuranceCertificate
 };
+

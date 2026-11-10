@@ -31,3 +31,4 @@ function getHotelsForDestination(destCode) {
 module.exports = {
   getHotelsForDestination
 };
+

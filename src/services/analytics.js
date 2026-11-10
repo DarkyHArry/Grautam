@@ -34,3 +34,4 @@ function calculateTravelAnalytics(bookings = []) {
 module.exports = {
   calculateTravelAnalytics
 };
+

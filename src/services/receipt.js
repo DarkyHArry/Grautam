@@ -59,3 +59,4 @@ function generateReceiptHtml(booking) {
 module.exports = {
   generateReceiptHtml
 };
+
