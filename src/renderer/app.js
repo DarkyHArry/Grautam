@@ -7,7 +7,21 @@ const $$ = selector => document.querySelectorAll(selector);
 const formatBRL = val => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 const escapeHtml = str => String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// Global State
+const WEATHER_DATA = {
+  GIG: { temp: '29°C', condition: 'Ensolarado', icon: 'bi-sun' },
+  SDU: { temp: '28°C', condition: 'Ensolarado', icon: 'bi-sun' },
+  GRU: { temp: '22°C', condition: 'Nublado', icon: 'bi-cloud-sun' },
+  BSB: { temp: '26°C', condition: 'Céu Aberto', icon: 'bi-sun' },
+  SSA: { temp: '31°C', condition: 'Sol e Praia', icon: 'bi-sun' },
+  FEN: { temp: '30°C', condition: 'Sol Forte', icon: 'bi-brightness-high' },
+  LIS: { temp: '19°C', condition: 'Ameno', icon: 'bi-cloud-sun' },
+  MIA: { temp: '32°C', condition: 'Tropical', icon: 'bi-sun' }
+};
+
+function getWeatherSnippet(destCode) {
+  const w = WEATHER_DATA[destCode] || { temp: '25°C', condition: 'Estável', icon: 'bi-sun' };
+  return `<span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 10px; color: var(--claude-accent); margin-top: 3px;"><i class="bi ${w.icon}"></i> ${w.temp} · ${w.condition}</span>`;
+}
 let currentTab = 'search';
 let activeSearchResults = [];
 let selectedFlightForCheckout = null;
@@ -180,6 +194,7 @@ function renderFlightResults(flights) {
           <span class="time-val">${escapeHtml(flight.arrivalTime)}</span>
           <span class="airport-code">${escapeHtml(flight.destination.code)}</span>
           <span class="airport-city">${escapeHtml(flight.destination.city)}</span>
+          ${getWeatherSnippet(flight.destination.code)}
         </div>
       </div>
 
