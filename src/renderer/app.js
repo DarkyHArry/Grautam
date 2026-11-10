@@ -451,7 +451,10 @@ $('#btnConfirmEmission').addEventListener('click', async () => {
 // ==========================================================================
 // BOARDING PASS (CARTÃO DE EMBARQUE)
 // ==========================================================================
+let currentBoardingPassBooking = null;
+
 function openBoardingPassModal(booking) {
+  currentBoardingPassBooking = booking;
   $('#passAirlineName').textContent = booking.airline;
   $('#passPnr').textContent = booking.pnr;
   $('#passOriginCode').textContent = booking.originCode || 'GRU';
@@ -482,6 +485,23 @@ $('#btnClosePass').addEventListener('click', () => {
 
 $('#btnPrintTicket').addEventListener('click', () => {
   window.print();
+});
+
+$('#btnExportCalendar')?.addEventListener('click', async () => {
+  if (!currentBoardingPassBooking) return;
+  try {
+    const icsContent = await api.request('calendar:export', currentBoardingPassBooking);
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Voo_${currentBoardingPassBooking.pnr || 'Grautam'}.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('Arquivo de agenda (.ics) gerado com sucesso!', 'bi-calendar-check');
+  } catch (err) {
+    showToast(err.message, 'bi-x-circle');
+  }
 });
 
 $('#closeReceiptModal')?.addEventListener('click', () => {
