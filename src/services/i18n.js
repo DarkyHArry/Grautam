@@ -1,7 +1,7 @@
 // Sistema de Internacionalização (i18n) - Grautam Viagens
 const DICTIONARIES = {
   'pt-BR': {
-    appName: 'Grautam Linhas Aéreas',
+    appName: 'Grautam Viagens',
     tagline: 'Sistema de Passagens Aéreas',
     searchFlights: 'Buscar Passagens',
     myBookings: 'Minhas Reservas',

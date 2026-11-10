@@ -8,7 +8,7 @@ function generateReceiptHtml(booking) {
   return `
     <div class="receipt-document" style="font-family: monospace; padding: 24px; color: #181816; background: #ffffff; border-radius: 8px;">
       <div style="border-bottom: 2px solid #181816; padding-bottom: 12px; margin-bottom: 16px;">
-        <h2 style="margin: 0; font-size: 18px;">GRAUTAM LINHAS AÉREAS S.A.</h2>
+        <h2 style="margin: 0; font-size: 18px;">GRAUTAM VIAGENS &amp; TURISMO S.A.</h2>
         <small>CNPJ: 04.912.840/0001-92 · SAC: 0800 782 4100</small><br>
         <b style="font-size: 14px;">COMPROVANTE DE VENDA DE PASSAGEM AÉREA</b>
       </div>

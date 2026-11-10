@@ -12,7 +12,7 @@ function generateIcsCalendar(booking) {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Grautam Linhas Aereas//Booking System//PT',
+    'PRODID:-//Grautam Viagens//Booking System//PT',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
