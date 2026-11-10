@@ -431,6 +431,11 @@ $('#btnCopyPix').addEventListener('click', () => {
   showToast('Chave PIX copiada para a área de transferência!', 'bi-clipboard-check');
 });
 
+$('#btnOpenSimFromCheckout')?.addEventListener('click', () => {
+  const currentTotal = selectedFlightForCheckout?.totalPrice || 389.00;
+  openPaymentSimulator(currentTotal);
+});
+
 // Confirm Ticket Emission
 $('#btnConfirmEmission').addEventListener('click', async () => {
   if (!selectedFlightForCheckout) return;

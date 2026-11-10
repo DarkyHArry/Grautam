@@ -1,15 +1,15 @@
 <div align="center">
 
-# ✈️ Grautam Viagens
+# Grautam Viagens
 ### Sistema Comercial Desktop de Vendas de Passagens Aéreas & Telemetria em Tempo Real
 
 [![Electron](https://img.shields.io/badge/Electron-39.8.10-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Theme](https://img.shields.io/badge/Theme-LATAM_Official_Dark-E6004C?style=for-the-badge&logo=latam-airlines&logoColor=white)](#-identidade-visual-oficial-latam-airlines)
-[![Tests](https://img.shields.io/badge/Tests-Passing_100%25-2FD080?style=for-the-badge&logo=checkmarx&logoColor=white)](#-su%C3%ADte-de-testes)
-[![OpenSky Network](https://img.shields.io/badge/API-OpenSky_ADS--B_Live-0078D2?style=for-the-badge&logo=radar&logoColor=white)](#-radar-de-voos-em-tempo-real-api-p%C3%BAblica-ads-b)
-[![ExchangeRate API](https://img.shields.io/badge/API-ExchangeRate_Live-F59E0B?style=for-the-badge&logo=cashapp&logoColor=white)](#-conversor-multimoedas-ao-vivo)
-[![Platform](https://img.shields.io/badge/Platform-Windows_x64-0078D6?style=for-the-badge&logo=windows&logoColor=white)](#-instala%C3%A7%C3%A3o-e-execu%C3%A7%C3%A3o)
+[![Theme](https://img.shields.io/badge/Theme-LATAM_Official_Dark-E6004C?style=for-the-badge&logo=latam-airlines&logoColor=white)](#identidade-visual-oficial-latam-airlines)
+[![Tests](https://img.shields.io/badge/Tests-Passing_100%25-2FD080?style=for-the-badge&logo=checkmarx&logoColor=white)](#suite-de-testes)
+[![OpenSky Network](https://img.shields.io/badge/API-OpenSky_ADS--B_Live-0078D2?style=for-the-badge&logo=radar&logoColor=white)](#radar-de-voos-em-tempo-real-api-publica-ads-b)
+[![ExchangeRate API](https://img.shields.io/badge/API-ExchangeRate_Live-F59E0B?style=for-the-badge&logo=cashapp&logoColor=white)](#conversor-multimoedas-ao-vivo)
+[![Platform](https://img.shields.io/badge/Platform-Windows_x64-0078D6?style=for-the-badge&logo=windows&logoColor=white)](#instalacao-e-execucao)
 
 <p align="center">
   <b>Grautam Viagens</b> é uma aplicação desktop nativa de alta fidelidade desenvolvida em Electron para emissão, reserva, telemetria de tráfego aéreo e demonstração comercial de passagens aéreas. O software adota o <b>Modo Escuro com as cores oficiais da LATAM Airlines</b>, combinando tipografia editorial, controles frameless fluidos e integração com APIs públicas em tempo real.
@@ -19,23 +19,23 @@
 
 ---
 
-## 📑 Sumário
+## Sumário
 
-- [Destaques da Versão](#-destaques-da-versão)
-- [Identidade Visual Oficial LATAM Airlines](#-identidade-visual-oficial-latam-airlines)
-- [Navegação Rápida no Topo](#-menu-de-navega%C3%A7%C3%A3o-r%C3%A1pida-no-topo)
-- [Radar de Voos Ao Vivo (API Pública OpenSky)](#-radar-de-voos-em-tempo-real-api-p%C3%BAblica-ads-b)
-- [Simulador Interativo de Pagamentos](#-simulador-de-gera%C3%A7%C3%A3o-de-pagamentos-demonstrativos)
-- [Conversor Multimoedas Ao Vivo](#-conversor-multimoedas-ao-vivo)
-- [Módulos e Funcionalidades do Sistema](#-funcionalidades-completas)
-- [Arquitetura e Estrutura de Diretórios](#-arquitetura-do-projeto)
-- [Instalação e Execução](#-instala%C3%A7%C3%A3o-e-execu%C3%A7%C3%A3o)
-- [Suíte de Testes Automatizados](#-su%C3%ADte-de-testes)
-- [Otimizações de Memória e Energia](#-otimiza%C3%A7%C3%B5es-de-mem%C3%B3ria-e-energia)
+- [Destaques da Versão](#destaques-da-versao)
+- [Identidade Visual Oficial LATAM Airlines](#identidade-visual-oficial-latam-airlines)
+- [Menu de Navegação Rápida no Topo](#menu-de-navegacao-rapida-no-topo)
+- [Radar de Voos Ao Vivo (API Pública OpenSky)](#radar-de-voos-em-tempo-real-api-publica-ads-b)
+- [Simulador Interativo de Pagamentos](#simulador-de-geracao-de-pagamentos-demonstrativos)
+- [Conversor Multimoedas Ao Vivo](#conversor-multimoedas-ao-vivo)
+- [Módulos e Funcionalidades do Sistema](#funcionalidades-completas)
+- [Arquitetura e Estrutura de Diretórios](#arquitetura-do-projeto)
+- [Instalação e Execução](#instalacao-e-execucao)
+- [Suíte de Testes Automatizados](#suite-de-testes)
+- [Otimizações de Memória e Energia](#otimizacoes-de-memoria-e-energia)
 
 ---
 
-## 🚀 Destaques da Versão
+## Destaques da Versão
 
 - **Radar ADS-B em Tempo Real via API Pública**: Consulta ao vivo de transponders de tráfego aéreo sobre o espaço aéreo via **OpenSky Network**, identificando aeronaves comerciais (**LATAM**, **GOL**, **Azul**, **TAP**), altitude em níveis de voo (FL) e metros, velocidade solo em km/h e bússola com rotação magnética.
 - **Menu de Navegação Rápida Superior**: Barra de ações prioritárias no topo do container principal para acesso em um clique aos recursos essenciais da aplicação.
@@ -49,7 +49,7 @@
 
 ---
 
-## 🎨 Identidade Visual Oficial LATAM Airlines
+## Identidade Visual Oficial LATAM Airlines
 
 A interface adota a consagrada linguagem de design aeroespacial da LATAM:
 
@@ -68,21 +68,21 @@ A interface adota a consagrada linguagem de design aeroespacial da LATAM:
 
 ---
 
-## ⚡ Menu de Navegação Rápida no Topo
+## Menu de Navegação Rápida no Topo
 
 Fixado no topo da área principal, logo abaixo do cabeçalho, permite navegação ágil para:
 
-1. `⚡ Buscar Voos`: Abre a busca comercial de passagens e foca o campo de origem.
-2. `📡 Radar Ao Vivo (API)`: Alterna diretamente para o radar ADS-B de aeronaves.
-3. `💳 Simular Pagamento`: Abre o gerador de pagamentos demonstrativos com QR Code e Cartão 3D.
-4. `🎫 Último Bilhete`: Abre o cartão de embarque digital com código de barras da última reserva.
-5. `🔥 Ofertas Relâmpago`: Exibe as tarifas promocionais do dia com até 40% de desconto.
-6. `💱 Cotação Moedas`: Sincroniza as taxas de câmbio ao vivo e exibe toast com a cotação atual.
-7. `🆘 Ajuda ANAC`: Exibe os direitos do passageiro e regras da Resolução 400 da ANAC.
+1. `Buscar Voos`: Abre a busca comercial de passagens e foca o campo de origem.
+2. `Radar Ao Vivo (API)`: Alterna diretamente para o radar ADS-B de aeronaves.
+3. `Simular Pagamento`: Abre o gerador de pagamentos demonstrativos com QR Code e Cartão 3D.
+4. `Último Bilhete`: Abre o cartão de embarque digital com código de barras da última reserva.
+5. `Ofertas Relâmpago`: Exibe as tarifas promocionais do dia com até 40% de desconto.
+6. `Cotação Moedas`: Sincroniza as taxas de câmbio ao vivo e exibe toast com a cotação atual.
+7. `Ajuda ANAC`: Exibe os direitos do passageiro e regras da Resolução 400 da ANAC.
 
 ---
 
-## 📡 Radar de Voos em Tempo Real (API Pública ADS-B)
+## Radar de Voos em Tempo Real (API Pública ADS-B)
 
 O módulo de radar conecta-se à API pública da **OpenSky Network**:
 
@@ -95,7 +95,7 @@ O módulo de radar conecta-se à API pública da **OpenSky Network**:
 
 ---
 
-## 💳 Simulador de Geração de Pagamentos Demonstrativos
+## Simulador de Geração de Pagamentos Demonstrativos
 
 Criado especificamente para apresentações e validações de fluxo comercial:
 
@@ -120,7 +120,7 @@ Criado especificamente para apresentações e validações de fluxo comercial:
 
 ---
 
-## 💱 Conversor Multimoedas Ao Vivo
+## Conversor Multimoedas Ao Vivo
 
 - Conexão em tempo real com `https://open.er-api.com/v6/latest/BRL`.
 - Suporte nativo e bidirecional a **Real (BRL - R$)**, **Dólar Americano (USD - US$)** e **Euro (EUR - €)**.
@@ -129,7 +129,7 @@ Criado especificamente para apresentações e validações de fluxo comercial:
 
 ---
 
-## 📦 Funcionalidades Completas
+## Funcionalidades Completas
 
 - **Busca de Passagens**: Rotas nacionais e internacionais (GRU, GIG, BSB, SDU, SSA, REC, FOR, LIS, MIA, etc.).
 - **Mapa de Assentos**: Seleção interativa de poltronas padrão, janela, corredor ou espaço extra.
@@ -141,7 +141,7 @@ Criado especificamente para apresentações e validações de fluxo comercial:
 
 ---
 
-## 📂 Arquitetura do Projeto
+## Arquitetura do Projeto
 
 ```
 Grautam/
@@ -181,7 +181,7 @@ Grautam/
 
 ---
 
-## 💻 Instalação e Execução
+## Instalação e Execução
 
 ### Pré-requisitos
 - **Node.js** 20.x ou 22.x LTS instalado.
@@ -211,7 +211,7 @@ O instalador autônomo será gerado no diretório `dist/Grautam.Setup.exe`.
 
 ---
 
-## 🧪 Suíte de Testes
+## Suíte de Testes
 
 O projeto conta com testes unitários cobrindo todos os serviços comerciais e integrações:
 
@@ -237,7 +237,7 @@ npm test
 
 ---
 
-## ⚡ Otimizações de Memória e Energia
+## Otimizações de Memória e Energia
 
 1. **Throttling em Segundo Plano**: `backgroundThrottling: true` habilitado nas preferências da janela web para reduzir o consumo de ciclos de CPU quando o aplicativo está oculto.
 2. **Desativação de Spellcheck**: `spellcheck: false` configurado para economizar memória RAM associada ao corretor ortográfico nativo do Chromium.
@@ -246,7 +246,7 @@ npm test
 
 ---
 
-## 📄 Licença
+## Licença
 
 Distribuído sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
 
