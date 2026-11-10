@@ -6,7 +6,7 @@
   "author": "Grautam",
   "license": "UNLICENSED",
   "scripts": {
-    "start": "electron .",
+    "start": "node scripts/start.js",
     "test": "node tests/run-tests.js",
     "dist": "electron-builder"
   },
