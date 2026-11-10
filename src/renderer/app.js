@@ -28,6 +28,7 @@ let selectedFlightForCheckout = null;
 let currentSelectedSeat = '12A';
 let currentPaymentMethod = 'PIX';
 let currentAirlineFilter = 'all';
+let currentTimeFilter = 'all';
 let filterDirectOnlyActive = false;
 let userSettings = {};
 
@@ -144,6 +145,15 @@ function renderFlightResults(flights) {
   }
   if (filterDirectOnlyActive) {
     filtered = filtered.filter(f => f.stops === 0);
+  }
+  if (currentTimeFilter !== 'all') {
+    filtered = filtered.filter(f => {
+      const hour = parseInt(f.departureTime.split(':')[0], 10);
+      if (currentTimeFilter === 'morning') return hour >= 6 && hour < 12;
+      if (currentTimeFilter === 'afternoon') return hour >= 12 && hour < 18;
+      if (currentTimeFilter === 'night') return hour >= 18 || hour < 6;
+      return true;
+    });
   }
 
   if (!filtered.length) {
@@ -855,6 +865,21 @@ $('#filterDirectOnly')?.addEventListener('click', () => {
   filterDirectOnlyActive = !filterDirectOnlyActive;
   $('#filterDirectOnly').classList.toggle('active', filterDirectOnlyActive);
   renderFlightResults(activeSearchResults);
+});
+
+// Time Slot Filters
+$$('.filter-pill-btn[data-timefilter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const isAlreadyActive = btn.classList.contains('active');
+    $$('.filter-pill-btn[data-timefilter]').forEach(b => b.classList.remove('active'));
+    if (!isAlreadyActive) {
+      btn.classList.add('active');
+      currentTimeFilter = btn.dataset.timefilter;
+    } else {
+      currentTimeFilter = 'all';
+    }
+    renderFlightResults(activeSearchResults);
+  });
 });
 
 // Initialize Date Defaults (Departure in 3 days, Return in 10 days)
