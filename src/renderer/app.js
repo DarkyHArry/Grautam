@@ -4,8 +4,32 @@ const api = window.grautam;
 // Utility functions
 const $ = selector => document.querySelector(selector);
 const $$ = selector => document.querySelectorAll(selector);
-const formatBRL = val => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 const escapeHtml = str => String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+let currentCurrency = 'BRL';
+
+const CURRENCY_RATES = {
+  BRL: 1.0,
+  USD: 5.42,
+  EUR: 5.88
+};
+
+const CURRENCY_LOCALES = {
+  BRL: 'pt-BR',
+  USD: 'en-US',
+  EUR: 'de-DE'
+};
+
+function formatCurrency(valInBrl, currency = currentCurrency) {
+  const rate = CURRENCY_RATES[currency] || 1.0;
+  const converted = (Number(valInBrl) || 0) / rate;
+  return new Intl.NumberFormat(CURRENCY_LOCALES[currency] || 'pt-BR', {
+    style: 'currency',
+    currency: currency
+  }).format(converted);
+}
+
+const formatBRL = val => formatCurrency(val);
 
 const WEATHER_DATA = {
   GIG: { temp: '29°C', condition: 'Ensolarado', icon: 'bi-sun' },
@@ -905,12 +929,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load Settings
   try {
     userSettings = await api.request('settings:get');
+    if (userSettings.currency) {
+      currentCurrency = userSettings.currency;
+      if ($('#topbarCurrencySelect')) $('#topbarCurrencySelect').value = currentCurrency;
+    }
     if ($('#passengerDisplayName')) {
       $('#passengerDisplayName').textContent = userSettings.passengerName || 'Carlos Silveira';
     }
   } catch (err) {
     console.error(err);
   }
+
+  // Topbar Currency Change Event
+  $('#topbarCurrencySelect')?.addEventListener('change', async e => {
+    currentCurrency = e.target.value;
+    userSettings.currency = currentCurrency;
+    api.request('settings:set', userSettings).catch(() => {});
+    renderFlightResults(activeSearchResults);
+    loadDeals();
+    loadBookings();
+    showToast(`Moeda alterada para ${currentCurrency}.`, 'bi-cash-coin');
+  });
 
   // Load Initial Data
   loadBookings();
