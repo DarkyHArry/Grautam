@@ -875,6 +875,58 @@ document.addEventListener('click', e => {
   }
 });
 
+// Global Keyboard Shortcuts (Escape to close modals, Alt+1..4 for Quick Navigation)
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    let closedAny = false;
+
+    const simModal = $('#paymentSimulatorModal');
+    if (simModal && simModal.classList.contains('open')) {
+      closePaymentSimulator();
+      closedAny = true;
+    }
+
+    const anacModal = $('#anacHelpModal');
+    if (anacModal && anacModal.classList.contains('open')) {
+      anacModal.classList.remove('open');
+      closedAny = true;
+    }
+
+    const chkModal = $('#checkoutModal');
+    if (chkModal && chkModal.classList.contains('show')) {
+      chkModal.classList.remove('show');
+      closedAny = true;
+    }
+
+    const passModal = $('#boardingPassModal');
+    if (passModal && passModal.classList.contains('show')) {
+      passModal.classList.remove('show');
+      closedAny = true;
+    }
+
+    const recModal = $('#receiptModal');
+    if (recModal && recModal.classList.contains('show')) {
+      recModal.classList.remove('show');
+      closedAny = true;
+    }
+
+    const notifPopover = $('#notifPopover');
+    if (notifPopover && notifPopover.classList.contains('show')) {
+      notifPopover.classList.remove('show');
+      closedAny = true;
+    }
+
+    if (closedAny) e.preventDefault();
+  }
+
+  if (e.altKey && !e.ctrlKey) {
+    if (e.key === '1') { switchTab('search'); $('#searchOriginInput')?.focus(); e.preventDefault(); }
+    else if (e.key === '2') { switchTab('radar'); e.preventDefault(); }
+    else if (e.key === '3') { openPaymentSimulator(); e.preventDefault(); }
+    else if (e.key === '4') { switchTab('bookings'); e.preventDefault(); }
+  }
+});
+
 // ==========================================================================
 // RADAR AO VIVO (API PÚBLICA OPENSKY ADS-B)
 // ==========================================================================
