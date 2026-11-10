@@ -9,6 +9,10 @@ if (!app.isPackaged) {
 
 const data = require('./services/store');
 const flights = require('./services/flights');
+const currency = require('./services/currency');
+const analytics = require('./services/analytics');
+const calendar = require('./services/calendar');
+const receipt = require('./services/receipt');
 
 let mainWindow;
 let tray;
@@ -188,6 +192,24 @@ ipcMain.handle('app:request', async (event, channel, payload) => {
 
     case 'flights:airports':
       return flights.getAirports();
+
+    case 'currency:list':
+      return currency.getAvailableCurrencies();
+
+    case 'currency:convert':
+      return {
+        converted: currency.convertCurrency(payload?.amount || 0, payload?.target || 'BRL'),
+        formatted: currency.formatPrice(payload?.amount || 0, payload?.target || 'BRL')
+      };
+
+    case 'analytics:get':
+      return analytics.calculateTravelAnalytics(data.listBookings());
+
+    case 'calendar:export':
+      return calendar.generateIcsCalendar(payload || {});
+
+    case 'receipt:html':
+      return receipt.generateReceiptHtml(payload || {});
 
     case 'bookings:list':
       return data.listBookings();
