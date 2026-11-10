@@ -131,40 +131,40 @@
         </header>
 
         <!-- Menu de Navegação Rápida no Topo -->
-        <nav class="quick-nav-bar" aria-label="Navegação Rápida">
+        <nav class="quick-nav-bar" aria-label="Atalhos">
           <div class="quick-nav-label">
-            <i class="bi bi-lightning-charge-fill" style="color: var(--latam-coral);"></i>
-            <span>Ações Rápidas:</span>
+            <i class="bi bi-compass" style="color: var(--claude-accent);"></i>
+            <span>Atalhos:</span>
           </div>
           <div class="quick-nav-items">
-            <button type="button" class="quick-nav-btn" id="qnavSearch" title="Abrir busca de passagens aéreas">
+            <button type="button" class="quick-nav-btn" id="qnavSearch" title="Buscar passagens">
               <i class="bi bi-search"></i>
               <span>Buscar Voos</span>
             </button>
-            <button type="button" class="quick-nav-btn highlight-coral" id="qnavRadar" title="Abrir radar ADS-B de voos em tempo real via API pública">
+            <button type="button" class="quick-nav-btn highlight-coral" id="qnavRadar" title="Acompanhar voos em tempo real">
               <span class="live-pulse-dot"></span>
               <i class="bi bi-broadcast-pin"></i>
-              <span>Radar Ao Vivo (API)</span>
+              <span>Radar de Voos</span>
             </button>
-            <button type="button" class="quick-nav-btn highlight-gold" id="qnavPaymentSim" title="Abrir simulador interativo de geração de pagamentos PIX e Cartão">
-              <i class="bi bi-credit-card-2-front-fill"></i>
+            <button type="button" class="quick-nav-btn highlight-gold" id="qnavPaymentSim" title="Testar fluxo de pagamento">
+              <i class="bi bi-credit-card-2-front"></i>
               <span>Simular Pagamento</span>
             </button>
-            <button type="button" class="quick-nav-btn" id="qnavLastTicket" title="Visualizar ou reimprimir último bilhete emitido">
-              <i class="bi bi-receipt"></i>
-              <span>Último Bilhete</span>
+            <button type="button" class="quick-nav-btn" id="qnavLastTicket" title="Abrir cartão de embarque da última viagem">
+              <i class="bi bi-ticket-perforated"></i>
+              <span>Meu Último Bilhete</span>
             </button>
-            <button type="button" class="quick-nav-btn" id="qnavDeals" title="Ver promoções e ofertas relâmpago de passagens">
-              <i class="bi bi-fire" style="color: #ff5722;"></i>
-              <span>Ofertas Relâmpago</span>
+            <button type="button" class="quick-nav-btn" id="qnavDeals" title="Ver promoções do dia">
+              <i class="bi bi-tag"></i>
+              <span>Promoções</span>
             </button>
-            <button type="button" class="quick-nav-btn" id="qnavCurrencySync" title="Sincronizar taxas de câmbio ao vivo (USD/EUR/BRL)">
+            <button type="button" class="quick-nav-btn" id="qnavCurrencySync" title="Atualizar cotações de câmbio">
               <i class="bi bi-arrow-repeat"></i>
-              <span id="qnavCurrencyLabel">Cotação Moedas</span>
+              <span id="qnavCurrencyLabel">Câmbio</span>
             </button>
-            <button type="button" class="quick-nav-btn" id="qnavAnacHelp" title="Regulamentação ANAC e Direitos do Passageiro">
-              <i class="bi bi-shield-check" style="color: #2fd080;"></i>
-              <span>Ajuda ANAC</span>
+            <button type="button" class="quick-nav-btn" id="qnavAnacHelp" title="Regras e direitos do passageiro">
+              <i class="bi bi-shield-check"></i>
+              <span>Regras ANAC</span>
             </button>
           </div>
         </nav>
@@ -175,9 +175,9 @@
           <!-- VIEW 1: BUSCAR PASSAGENS -->
           <section class="view-section active" id="view-search">
             <div class="page-hero">
-              <div class="page-eyebrow">Tarifas Aéreas em Tempo Real</div>
-              <h1 class="page-title">Descubra seu próximo destino.</h1>
-              <p class="page-description">Pesquise passagens aéreas nacionais e internacionais com tarifas exclusivas, parcelamento em até 12x e emissão instantânea.</p>
+              <div class="page-eyebrow">Planejamento de Viagem</div>
+              <h1 class="page-title">Para onde você quer voar?</h1>
+              <p class="page-description">Encontre passagens com tarifas claras, escolha seu assento e parcele em até 12x sem juros.</p>
             </div>
 
             <!-- Search Card -->
@@ -435,28 +435,28 @@
           <!-- VIEW: RADAR AO VIVO (API PÚBLICA ADS-B) -->
           <section class="view-section" id="view-radar">
             <div class="page-hero">
-              <div class="page-eyebrow">ADS-B Flight Tracking · OpenSky Network API</div>
-              <h1 class="page-title">Radar de Voos Ao Vivo em Tempo Real</h1>
-              <p class="page-description">Telemetria ao vivo de tráfego aéreo comercial conectada diretamente à rede pública ADS-B OpenSky Network, com identificação automática de voos LATAM, altitudes e velocidades.</p>
+              <div class="page-eyebrow">Tráfego Aéreo</div>
+              <h1 class="page-title">Voos no ar agora</h1>
+              <p class="page-description">Acompanhe aeronaves em rota em tempo real, com altitude de cruzeiro, velocidade e companhias aéreas.</p>
             </div>
 
             <!-- Stats Bar -->
             <div class="radar-stats-grid">
               <div class="radar-stat-card">
                 <span class="radar-stat-val" id="radarStatTotal">--</span>
-                <span class="radar-stat-label">Aeronaves no Espaço Aéreo</span>
+                <span class="radar-stat-label">Voos monitorados</span>
               </div>
               <div class="radar-stat-card">
-                <span class="radar-stat-val" style="color: var(--latam-coral);" id="radarStatLatam">--</span>
-                <span class="radar-stat-label">Voos LATAM Detectados</span>
+                <span class="radar-stat-val" style="color: var(--claude-accent);" id="radarStatLatam">--</span>
+                <span class="radar-stat-label">Voos LATAM no ar</span>
               </div>
               <div class="radar-stat-card">
                 <span class="radar-stat-val" id="radarStatAltitude">--</span>
-                <span class="radar-stat-label">Altitude Média de Voo</span>
+                <span class="radar-stat-label">Altitude média</span>
               </div>
               <div class="radar-stat-card">
                 <span class="radar-stat-val" style="font-size: 14px; font-family: var(--font-mono); color: var(--status-emerald);" id="radarStatSource">Conectando...</span>
-                <span class="radar-stat-label">Fonte de Telemetria</span>
+                <span class="radar-stat-label">Sinal de Telemetria</span>
               </div>
             </div>
 
@@ -910,11 +910,10 @@
     <div class="sim-modal-card">
       <div class="sim-modal-header">
         <div class="sim-modal-title">
-          <i class="bi bi-wallet2" style="color: var(--latam-coral);"></i>
-          <span>Simulador de Geração de Pagamentos</span>
-          <span class="nav-pill" style="background: rgba(230, 0, 76, 0.18); color: #ff3b75;">Demonstração</span>
+          <i class="bi bi-wallet2" style="color: var(--claude-accent);"></i>
+          <span>Simulação de Pagamento</span>
         </div>
-        <button type="button" class="modal-close-btn" id="closePaymentSimModal" title="Fechar Simulador">
+        <button type="button" class="modal-close-btn" id="closePaymentSimModal" title="Fechar">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -922,9 +921,9 @@
       <!-- Presets de Tarifas -->
       <div class="sim-amount-selector">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--text-secondary);">Tarifa do Bilhete / Simulação:</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--text-secondary);">Valor para o teste:</span>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--latam-coral);" id="simSelectedAmountDisplay">R$ 389,00</span>
+            <span style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--claude-accent);" id="simSelectedAmountDisplay">R$ 389,00</span>
           </div>
         </div>
         <div class="sim-preset-chips">
@@ -945,7 +944,7 @@
           <i class="bi bi-qr-code"></i> PIX Instantâneo
         </button>
         <button type="button" class="sim-tab-btn" data-sim-tab="card">
-          <i class="bi bi-credit-card-2-front"></i> Cartão de Crédito 3D
+          <i class="bi bi-credit-card-2-front"></i> Cartão de Crédito
         </button>
         <button type="button" class="sim-tab-btn" data-sim-tab="boleto">
           <i class="bi bi-upc-scan"></i> Boleto Bancário
@@ -962,14 +961,14 @@
               <!-- SVG QR Code is generated dynamically -->
             </div>
             <div>
-              <h4 style="margin: 0 0 4px 0; font-size: 14px; color: var(--text-primary);">Pague via PIX com Confirmação Instantânea</h4>
-              <p style="margin: 0; font-size: 11.5px; color: var(--text-secondary);">Abra o aplicativo de qualquer banco brasileiro e escaneie o QR Code acima ou copie a chave:</p>
+              <h4 style="margin: 0 0 4px 0; font-size: 14px; color: var(--text-primary);">Pagamento via PIX</h4>
+              <p style="margin: 0; font-size: 11.5px; color: var(--text-secondary);">Abra o aplicativo do seu banco, escolha PIX e aponte a câmera para o QR Code ou copie a chave:</p>
             </div>
 
             <div class="sim-copy-input-group">
               <input type="text" class="sim-copy-input" id="simPixKeyInput" readonly value="00020126580014br.gov.bcb.pix0136grautam-pix-gateway-55420212BR.GOV.BCB.PIX5204000053039865406389.005802BR5915GRAUTAM VIAGENS6009SAO PAULO62070503***63047A2B">
               <button type="button" class="btn-select-flight" id="btnCopySimPix" style="width: auto; padding: 0 16px;">
-                <i class="bi bi-copy"></i> Copiar
+                <i class="bi bi-copy"></i> Copiar Código
               </button>
             </div>
 
@@ -980,7 +979,7 @@
 
             <button type="button" class="btn-sim-action" id="btnSimulatePixPayment">
               <i class="bi bi-check2-circle" style="font-size: 18px;"></i>
-              <span>Simular Pagamento Concluído (Aprovação Instantânea)</span>
+              <span>Simular Confirmação do PIX</span>
             </button>
           </div>
 
@@ -989,20 +988,20 @@
             <div class="sim-success-icon">
               <i class="bi bi-check-lg"></i>
             </div>
-            <h3 style="margin: 0; font-size: 18px; color: var(--status-emerald);">Pagamento PIX Liquidado com Sucesso!</h3>
-            <p style="margin: 0; font-size: 12px; color: var(--text-secondary);">O Banco Central do Brasil confirmou a liquidação em tempo real (SPI). O bilhete eletrônico foi liberado para emissão.</p>
+            <h3 style="margin: 0; font-size: 17px; color: var(--status-emerald);">Pagamento confirmado!</h3>
+            <p style="margin: 0; font-size: 12px; color: var(--text-secondary);">A transferência PIX foi concluída com sucesso e a reserva já está liberada.</p>
             <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; width: 100%; text-align: left; font-family: var(--font-mono); font-size: 11px;">
-              <div><strong>STATUS:</strong> <span style="color: var(--status-emerald);">APROVADO & LIQUIDADO</span></div>
-              <div><strong>ID END-TO-END (BACEN):</strong> <span id="simPixE2E">E004169682026111091248019</span></div>
-              <div><strong>VALOR CONFIRMADO:</strong> <span id="simPixPaidVal">R$ 389,00</span></div>
-              <div><strong>DATA / HORA:</strong> <span id="simPixPaidTime">--:--:--</span></div>
+              <div><strong>STATUS:</strong> <span style="color: var(--status-emerald);">Confirmado</span></div>
+              <div><strong>ID DA TRANSAÇÃO:</strong> <span id="simPixE2E">E004169682026111091248019</span></div>
+              <div><strong>VALOR RECEBIDO:</strong> <span id="simPixPaidVal">R$ 389,00</span></div>
+              <div><strong>HORÁRIO:</strong> <span id="simPixPaidTime">--:--:--</span></div>
             </div>
             <div style="display: flex; gap: 10px; width: 100%;">
               <button type="button" class="btn-select-flight" id="btnSimResetPix" style="flex: 1;">
-                <i class="bi bi-arrow-counterclockwise"></i> Gerar Novo PIX
+                <i class="bi bi-arrow-counterclockwise"></i> Gerar Novo Código
               </button>
               <button type="button" class="btn-sim-action" id="btnSimClosePixDone" style="flex: 1;">
-                Concluir &amp; Fechar
+                Concluir
               </button>
             </div>
           </div>

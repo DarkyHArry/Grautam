@@ -87,7 +87,7 @@ function createWindow() {
     frame: false,
     show: false,
     title: 'Grautam — Vendas de Passagens Aéreas',
-    backgroundColor: '#0e001c',
+    backgroundColor: '#181816',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

@@ -6,68 +6,61 @@
 :root {
   color-scheme: dark;
 
-  /* Official LATAM Midnight Indigo Canvas & Surfaces */
-  --bg-canvas: #0e001c;
-  --bg-sidebar: #090014;
-  --bg-surface: #160228;
-  --bg-surface-elevated: #1f0538;
-  --bg-surface-hover: #2a0a4c;
-  --bg-input: #120121;
+  /* Claude Code Warm Dark Obsidian Surfaces */
+  --bg-canvas: #181816;
+  --bg-sidebar: #131211;
+  --bg-surface: #1e1e1b;
+  --bg-surface-elevated: #242320;
+  --bg-surface-hover: #292825;
+  --bg-input: #151513;
 
-  /* Official LATAM Borders & Dividers */
-  --border-subtle: #2d0b4e;
-  --border-medium: #411370;
-  --border-strong: #581a96;
-  --border-focus: #e6004c;
+  /* Claude Code Warm Subtle Borders */
+  --border-subtle: #2c2b27;
+  --border-medium: #383631;
+  --border-strong: #484640;
+  --border-focus: #d97736;
 
-  /* Crisp High-Contrast Typography */
-  --text-primary: #fcfaff;
-  --text-secondary: #c2b4d8;
-  --text-muted: #8573a2;
-  --text-inverse: #0e001c;
+  /* Claude Code Warm Human Typography (Parchment & Stone) */
+  --text-primary: #f5f2eb;
+  --text-secondary: #a6a49c;
+  --text-muted: #73716a;
+  --text-inverse: #181816;
 
-  /* Official LATAM Brand Colors */
-  --latam-coral: #e6004c;
-  --latam-coral-hover: #ff1a66;
-  --latam-coral-active: #cc0043;
-  --latam-coral-subtle: rgba(230, 0, 76, 0.15);
-  --latam-coral-border: rgba(230, 0, 76, 0.38);
-  --latam-coral-glow: 0 0 16px rgba(230, 0, 76, 0.35);
+  /* Claude Terracotta & Warm Coral Accents */
+  --claude-accent: #d97736;
+  --claude-accent-hover: #e68847;
+  --claude-accent-active: #c2652b;
+  --claude-accent-subtle: rgba(217, 119, 54, 0.12);
+  --claude-accent-border: rgba(217, 119, 54, 0.32);
 
-  --latam-indigo: #001b69;
-  --latam-indigo-subtle: rgba(0, 27, 105, 0.25);
-  --latam-purple: #7b38c2;
-
-  /* Accent mapped to LATAM Coral Red */
-  --claude-accent: #e6004c;
-  --claude-accent-hover: #ff1a66;
-  --claude-accent-active: #cc0043;
-  --claude-accent-subtle: rgba(230, 0, 76, 0.15);
-  --claude-accent-border: rgba(230, 0, 76, 0.38);
+  --latam-coral: #d97736;
+  --latam-coral-hover: #e68847;
+  --latam-coral-active: #c2652b;
+  --latam-coral-subtle: rgba(217, 119, 54, 0.12);
+  --latam-coral-border: rgba(217, 119, 54, 0.32);
 
   /* Status Colors */
-  --status-emerald: #2fd080;
-  --status-emerald-bg: rgba(47, 208, 128, 0.14);
-  --status-emerald-border: rgba(47, 208, 128, 0.32);
+  --status-emerald: #4eaa7b;
+  --status-emerald-bg: rgba(78, 170, 123, 0.12);
+  --status-emerald-border: rgba(78, 170, 123, 0.28);
 
-  --status-amber: #f59e0b;
-  --status-amber-bg: rgba(245, 158, 11, 0.14);
-  --status-amber-border: rgba(245, 158, 11, 0.32);
+  --status-amber: #d4973b;
+  --status-amber-bg: rgba(212, 151, 59, 0.12);
+  --status-amber-border: rgba(212, 151, 59, 0.28);
 
-  --status-crimson: #ff3b5c;
-  --status-crimson-bg: rgba(255, 59, 92, 0.14);
-  --status-crimson-border: rgba(255, 59, 92, 0.32);
+  --status-crimson: #df5a5a;
+  --status-crimson-bg: rgba(223, 90, 90, 0.12);
+  --status-crimson-border: rgba(223, 90, 90, 0.28);
 
-  /* Fonts */
-  --font-display: "Tipperary", "Copernicus", "Charter", "Iowan Old Style", "Georgia", serif;
+  /* Fonts - Genuine Claude Code Typography */
+  --font-display: "Copernicus", "Tipperary", "Charter", "Iowan Old Style", "Georgia", serif;
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, sans-serif;
   --font-mono: "Geist Mono", "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
 
   /* Elevations */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 8px 26px rgba(0, 0, 0, 0.50);
-  --shadow-lg: 0 16px 52px rgba(0, 0, 0, 0.70);
-  --shadow-latam: 0 8px 30px rgba(230, 0, 76, 0.20);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.38);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.54);
 }
 
 * {
@@ -95,25 +88,14 @@ select, option, optgroup {
 }
 
 select option {
-  background-color: #1a0430 !important;
-  color: #fcfaff !important;
+  background-color: #242320 !important;
+  color: #f5f2eb !important;
   padding: 8px 12px;
 }
 
 select option:checked {
-  background-color: #e6004c !important;
+  background-color: var(--claude-accent) !important;
   color: #ffffff !important;
-}
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: var(--bg-canvas);
-  color: var(--text-primary);
-  font-family: var(--font-ui);
-  font-size: 13px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
 }
 
 button, input, select, textarea {
@@ -2045,44 +2027,34 @@ a {
 }
 
 .quick-nav-btn.highlight-coral {
-  background: linear-gradient(135deg, rgba(230, 0, 76, 0.22) 0%, rgba(123, 56, 194, 0.18) 100%);
-  border-color: var(--latam-coral-border);
-  color: #ff4d84;
+  background-color: var(--claude-accent-subtle);
+  border-color: var(--claude-accent-border);
+  color: var(--claude-accent);
 }
 
 .quick-nav-btn.highlight-coral:hover {
-  background: linear-gradient(135deg, rgba(230, 0, 76, 0.35) 0%, rgba(123, 56, 194, 0.3) 100%);
-  border-color: var(--latam-coral);
-  box-shadow: 0 0 14px rgba(230, 0, 76, 0.35);
+  background-color: rgba(217, 119, 54, 0.2);
+  border-color: var(--claude-accent);
   color: #ffffff;
 }
 
 .quick-nav-btn.highlight-gold {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(230, 0, 76, 0.14) 100%);
-  border-color: rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
+  background-color: var(--status-amber-bg);
+  border-color: var(--status-amber-border);
+  color: var(--status-amber);
 }
 
 .quick-nav-btn.highlight-gold:hover {
-  border-color: #f59e0b;
+  border-color: var(--status-amber);
   color: #ffffff;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
 }
 
 .live-pulse-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: var(--latam-coral);
-  box-shadow: 0 0 8px var(--latam-coral);
-  animation: pulseLive 1.8s infinite;
+  background-color: var(--claude-accent);
   display: inline-block;
-}
-
-@keyframes pulseLive {
-  0% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(230, 0, 76, 0.7); }
-  70% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 0 6px rgba(230, 0, 76, 0); }
-  100% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(230, 0, 76, 0); }
 }
 
 /* ==========================================================================
@@ -2115,7 +2087,7 @@ a {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--latam-coral), var(--latam-purple));
+  background: var(--claude-accent);
 }
 
 .radar-stat-val {
@@ -2419,13 +2391,13 @@ a {
 }
 
 .sim-qr-box {
-  width: 190px;
-  height: 190px;
-  background: #160228;
-  border: 1px solid #3e126a;
+  width: 180px;
+  height: 180px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
   padding: 12px;
   border-radius: 12px;
-  box-shadow: 0 0 24px rgba(230, 0, 76, 0.25);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2456,25 +2428,23 @@ a {
 
 .btn-sim-action {
   width: 100%;
-  padding: 12px 18px;
-  border-radius: 10px;
-  border: 0;
-  background: linear-gradient(135deg, var(--latam-coral) 0%, #ba003e 100%);
+  padding: 11px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--claude-accent-active);
+  background: var(--claude-accent);
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: var(--shadow-latam);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .btn-sim-action:hover {
-  background: linear-gradient(135deg, var(--latam-coral-hover) 0%, #d40047 100%);
+  background: var(--claude-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(230, 0, 76, 0.4);
 }
 
 /* 3D Visual Card Preview */
@@ -2483,9 +2453,9 @@ a {
   max-width: 380px;
   height: 200px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #1f0438 0%, #0e001c 50%, #2f0754 100%);
-  border: 1px solid rgba(230, 0, 76, 0.35);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(230, 0, 76, 0.15);
+  background: linear-gradient(135deg, #282622 0%, #1c1b18 50%, #24221f 100%);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
   padding: 20px 22px;
   display: flex;
   flex-direction: column;
