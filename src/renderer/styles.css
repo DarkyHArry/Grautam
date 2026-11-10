@@ -283,7 +283,7 @@ a {
   width: 36px;
   height: 36px;
   border-radius: 9px;
-  background: linear-gradient(135deg, #242220 0%, #171615 100%);
+  background: linear-gradient(135deg, #240a3d 0%, #15002a 100%);
   border: 1px solid var(--border-medium);
   display: flex;
   align-items: center;
@@ -1711,7 +1711,8 @@ a {
 .pix-qr-visual {
   width: 130px;
   height: 130px;
-  background: #fff;
+  background: #160228;
+  border: 1px solid #3e126a;
   padding: 10px;
   border-radius: 8px;
   display: flex;
@@ -1763,15 +1764,15 @@ a {
    ========================================================================== */
 
 .boarding-pass-ticket {
-  background-color: #1c1b18;
-  border: 1px solid var(--border-strong);
+  background-color: #1f0538;
+  border: 1px solid #3e126a;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
 }
 
 .ticket-header-strip {
-  background: linear-gradient(135deg, #2a221b 0%, #1e1b18 100%);
+  background: linear-gradient(135deg, #2a0a4c 0%, #160228 100%);
   border-bottom: 1px solid var(--border-medium);
   padding: 16px 22px;
   display: flex;
@@ -2420,10 +2421,11 @@ a {
 .sim-qr-box {
   width: 190px;
   height: 190px;
-  background: #ffffff;
+  background: #160228;
+  border: 1px solid #3e126a;
   padding: 12px;
   border-radius: 12px;
-  box-shadow: 0 0 24px rgba(230, 0, 76, 0.2);
+  box-shadow: 0 0 24px rgba(230, 0, 76, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;

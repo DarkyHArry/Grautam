@@ -1146,14 +1146,14 @@ function generateSvgQrCode(content) {
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       if (matrix[r][c]) {
-        rects += `<rect x="${c}" y="${r}" width="1" height="1" fill="#0e001c" />`;
+        rects += `<rect x="${c}" y="${r}" width="1" height="1" fill="#fcfaff" />`;
       }
     }
   }
 
   return `
     <svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%; shape-rendering: crispEdges;">
-      <rect width="${size}" height="${size}" fill="#ffffff" />
+      <rect width="${size}" height="${size}" fill="#160228" />
       ${rects}
     </svg>
   `;
